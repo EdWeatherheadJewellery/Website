@@ -16,8 +16,8 @@
 //   5. Replace ALLOWED_ORIGIN below with your real site's domain once
 //      it's live, so only your site can call this function.
 
-const TO_EMAIL = 'you@yourdomain.com'; // TODO: replace with your real inbox
-const FROM_EMAIL = 'Your Jewellery Business <onboarding@resend.dev>'; // TODO: update after domain verification
+const TO_EMAIL = 'ed@edweatherheadjewellery.com'; // TODO: replace with your real inbox
+const FROM_EMAIL = 'Ed Weatherhead Jewellery <ed@contact.edweatherheadjewellery.com>'; // TODO: update after domain verification
 const ALLOWED_ORIGIN = '*'; // TODO: replace with e.g. 'https://yourdomain.com' once live
 
 const corsHeaders = {
