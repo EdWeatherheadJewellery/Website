@@ -1,0 +1,115 @@
+.archive-card {
+  background: var(--color-cards);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.archive-card-image-wrap {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: var(--color-border);
+}
+
+.archive-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.archive-card-sold {
+  position: absolute;
+  top: var(--space-1);
+  left: var(--space-1);
+  background: var(--color-red);
+  color: var(--color-cards);
+  font-size: var(--size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  z-index: 2;
+}
+
+.archive-card-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(43, 36, 32, 0.55);
+  color: white;
+  border: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.archive-card-nav:hover { background: rgba(43, 36, 32, 0.8); }
+.archive-card-nav-prev { left: var(--space-1); }
+.archive-card-nav-next { right: var(--space-1); }
+
+.archive-card-dots {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  z-index: 2;
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  max-width: 60%;
+  justify-content: flex-end;
+}
+
+.archive-card-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.55);
+  padding: 0;
+}
+
+.archive-card-dot.is-active { background: white; }
+
+.archive-card-counter {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  z-index: 2;
+  background: rgba(43, 36, 32, 0.55);
+  color: white;
+  font-size: var(--size-xs);
+  padding: 2px 8px;
+  border-radius: var(--radius);
+}
+
+.archive-card-info {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 1;
+  padding: var(--space-3) var(--space-2) var(--space-2);
+  background: linear-gradient(0deg, rgba(43,36,32,0.88) 10%, rgba(43,36,32,0.55) 65%, transparent);
+  color: white;
+}
+
+.archive-card-info h3 {
+  color: white;
+  font-size: var(--size-base);
+  margin-bottom: 0.35em;
+}
+
+.archive-card-info p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: var(--size-sm);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

@@ -1,0 +1,131 @@
+:root {
+  /* Color — grounded in the stones and metals in the product line
+     (labradorite chatoyancy, oxidized copper, raw silver, warm parchment) */
+
+
+  --color-navy: #333c6b;
+  --color-navy-light: #69809f;
+  --color-navy-muted: #37414F;
+  --color-sage: #6E8074;
+  --color-sage-light: #7ea48b;
+  --color-background: #f6f3ee;
+  --color-cards: #FFFFFF;
+  --color-border: #D0C7BC;
+  --color-red: #7C4038;
+
+
+
+  /* Type */
+  /* --font-display: 'Fraunces', 'Iowan Old Style', serif; */
+  --font-display: 'Noto Serif', 'Iowan Old Style', serif;
+  --font-body: 'Work Sans', -apple-system, sans-serif;
+
+  --size-xs: 0.75rem;
+  --size-sm: 0.875rem;
+  --size-base: 1rem;
+  --size-md: 1.25rem;
+  --size-lg: 1.75rem;
+  --size-xl: 2.75rem;
+  --size-2xl: 4rem;
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6.5rem;
+
+  --radius: 2px;
+  --max-width: 60rem;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+  
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-navy);
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.15;
+  margin: 0 0 var(--space-2);
+}
+
+h1 {
+  color: var(--color-navy-light);
+
+}
+
+h1 { font-size: var(--size-2xl); font-weight: 400; }
+h2 { font-size: var(--size-lg); }
+h3 { font-size: var(--size-md); }
+
+p, li { margin: 0 0 var(--space-2); color: var(--color-navy); }
+
+a {
+  color: var(--color-navy-light);
+  /* text-decoration: none; */
+}
+
+a:hover, a:active {
+  color: var(--color-sage-light);
+}
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-sage-light);
+  font-weight: 500;
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-3);
+}
+
+/* Page-level sections (Home, Shop, Archive, About, Contact all render
+   <section className="container">). More specific than .container alone,
+   so this applies on top of it without touching the div-based containers
+   used by Navbar/Hero/Footer (which have their own flex/grid layouts and
+   shouldn't have children forced to 100% width). */
+section.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+/* Default every direct child to fill the (already centered) container, so
+   nothing can end up narrower than the container without being explicitly
+   centered itself — this was the root cause of the About/Older Work
+   centering bug. Add a targeted exception below for any child that
+   shouldn't stretch. */
+section.container > * {
+  width: 100%;
+}
+
+/* Exception: the "Clear filters" link on the Shop page should size to its
+   own text, not stretch full width. */
+section.container > .filter-clear {
+  width: auto;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  html { scroll-behavior: auto; }
+}

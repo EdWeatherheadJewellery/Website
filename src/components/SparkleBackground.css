@@ -1,0 +1,16 @@
+.sparkle-host {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.sparkle-host .sparkleDiv {
+  position: absolute;
+  inset: 0;
+}
+
+.sparkle-host svg {
+  position: absolute;
+}

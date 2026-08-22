@@ -1,0 +1,27 @@
+  --color-canvas: #faf7f5;
+      /* warm parchment, not stark white */
+  --color-canvas-raised: #FFFFFF;
+  --color-ink: #333c6b;          
+      /* warm near-black, not pure black */
+  --color-ink-soft: #2e4e9e;
+  --color-flash: #526f49;        
+      /* labradorite chatoyant teal — primary accent */
+  --color-flash-dim: #DCE6E4;
+  --color-verdigris: #6F5A3E;    
+      /* oxidized copper — secondary accent */
+  --color-silver: #B8B2A4;       
+      /* raw metal accent for silver pieces */
+  --color-line: #DCD5C6;         
+      /* hairline / border color */
+  --color-sold: #A8402F;
+
+
+/* - background colour
+- background colour for key elements including product cards in product grid
+- main text colour
+- secondary/emphasis text colour
+- primary accent
+- secondary accent
+- 1px border colour
+- text colour for optional "Sold" text on product cards */
+
