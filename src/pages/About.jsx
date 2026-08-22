@@ -39,11 +39,15 @@ Questions I ask myself when designing a piece:
           {/* <li>Is there a practical way to make this setting? How would I construct it?</li> */}
         </ul>
         <p>
-          Do you have a specific piece in mind? I accept commission requests for custom pieces. Bring your own minerals, or choose from my in-house selection. <Link to="/contact">Drop me a line</Link> and let me know what you have in mind.
+          Do you have a specific piece in mind? I accept commission requests for custom pieces. Bring your own minerals, or choose from my in-house selection.
+          <Link to="/contact">Drop me a line</Link> and let me know what you have in mind.
         </p>
         <p>
           I have experience working with shamans and healers, and can make specific tools with the required minerals, symbols and intentions. I am attuned as a reiki channel.
         </p>
+
+            
+
 
       </div>
     </section>

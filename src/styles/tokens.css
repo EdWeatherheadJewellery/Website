@@ -42,7 +42,7 @@
 * { box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }
-  
+
 body {
   margin: 0;
   background: var(--color-background);
@@ -58,11 +58,7 @@ h1, h2, h3 {
   font-weight: 500;
   line-height: 1.15;
   margin: 0 0 var(--space-2);
-}
-
-h1 {
   color: var(--color-navy-light);
-
 }
 
 h1 { font-size: var(--size-2xl); font-weight: 400; }
@@ -73,7 +69,7 @@ p, li { margin: 0 0 var(--space-2); color: var(--color-navy); }
 
 a {
   color: var(--color-navy-light);
-  /* text-decoration: none; */
+  text-decoration: none;
 }
 
 a:hover, a:active {
