@@ -16,7 +16,8 @@
 //   5. Replace ALLOWED_ORIGIN below with your real site's domain once
 //      it's live, so only your site can call this function.
 
-const TO_EMAIL = 'ed@edweatherheadjewellery.com'; // TODO: replace with your real inbox
+// const TO_EMAIL = 'ed@edweatherheadjewellery.com'; // TODO: replace with your real inbox
+const TO_EMAIL = 'circlespiralstring@gmail.com'; // TODO: replace with your real inbox
 const FROM_EMAIL = 'Ed Weatherhead Jewellery <ed@edweatherheadjewellery.com>'; // TODO: update after domain verification
 // const ALLOWED_ORIGIN = 'https://edweatherheadjewellery.com/'; // TODO: replace with e.g. 'https://yourdomain.com' once live
 const ALLOWED_ORIGIN = '*'; // TODO: replace with e.g. 'https://yourdomain.com' once live
