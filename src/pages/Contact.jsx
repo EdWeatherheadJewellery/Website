@@ -5,7 +5,6 @@ import { useState } from 'react';
 // https://your-site-name.netlify.app/.netlify/functions/send-contact-email
 const CONTACT_ENDPOINT = 'https://incomparable-genie-e06daa.netlify.app/.netlify/functions/send-contact-email';
 
-
 const REASONS = [
   { value: '', label: 'Select a reason\u2026' },
   { value: 'custom', label: 'Request a custom commission' },
@@ -56,7 +55,12 @@ export default function Contact() {
 
       const res = await fetch(CONTACT_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        // text/plain (rather than application/json) keeps this a CORS
+        // "simple request", so the browser skips the OPTIONS preflight
+        // entirely — sidesteps a Netlify quirk where the preflight route
+        // 404s even though the function itself works fine. The function
+        // still JSON.parses the body regardless of this header's value.
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload),
       });
 
