@@ -79,7 +79,7 @@ export default function Contact() {
       <p className="eyebrow">Contact & Requests</p>
       <h1 style={{ fontSize: 'var(--size-xl)' }}>I'd love to hear from you.</h1>
       <p>
-        Do you have a specific design or stone in mind? A question about an item in the shop? Or any other questions or comments? Drop me a line and I'll follow up by email in the next three business days.
+        Do you have a specific design in mind, or a stone you'd like set? A question about an item in the shop, or about something else? Drop me a line and I'll follow up by email in the next three business days.
       </p>
 
       {sent ? (
