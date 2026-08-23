@@ -3,7 +3,8 @@ import { useState } from 'react';
 // TODO: replace with your deployed function's URL once you've set up the
 // Netlify site (see deployment steps) — it'll look like:
 // https://your-site-name.netlify.app/.netlify/functions/send-contact-email
-const CONTACT_ENDPOINT = 'https://cheerful-jewellery-123.netlify.app/.netlify/functions/send-contact-email';
+const CONTACT_ENDPOINT = 'https://incomparable-genie-e06daa.netlify.app/.netlify/functions/send-contact-email';
+
 
 const REASONS = [
   { value: '', label: 'Select a reason\u2026' },
