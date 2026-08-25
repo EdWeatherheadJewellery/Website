@@ -8,14 +8,14 @@ import './SparkleBackground.css';
 
 const COLORS = [
   '#FFFFFF',
-  '#FFFFFF',
-  'hsl(33, 30%, 93%)',
-  'hsl(141, 40%, 93%)',
+  // '#FFFFFF',
+  // 'hsl(33, 30%, 93%)',
+  // 'hsl(141, 40%, 93%)',
   // 'hsl(200, 40%, 93%)'
 ];
 
 const SPARKLES_PER_LAYER = 10;
-const SPARKLE_SIZE_INCREASE = 2;
+const SPARKLE_SIZE_INCREASE = 1.5;
 const LAYERS = 10;
 const RARITY_MIN = 100;
 const RARITY_MAX = 100;

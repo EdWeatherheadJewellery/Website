@@ -4,26 +4,26 @@ import './Navbar.css';
 
 export default function Navbar() {
   return (
-    <header className="navbar">
-      <div className="container navbar-inner">
-        <NavLink to="/" className="navbar-brand" end>
-          <img src="../images/logo.svg" />
-          Ed Weatherhead Jewellery
-          {/* Your Jewellery Business */}
+    <nav className="site-nav">
+      {navLinks.map((l) => (
+        <NavLink
+          key={l.to}
+          to={l.to}
+          end={l.end}
+          className={({ isActive }) => 'site-nav-link' + (isActive ? ' is-active' : '')}
+        >
+          {l.label}
         </NavLink>
-        <nav className="navbar-links">
-          {navLinks.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.end}
-              className={({ isActive }) => 'navbar-link' + (isActive ? ' is-active' : '')}
-            >
-              {l.label}
-            </NavLink>
-          ))}
-        </nav>
-      </div>
-    </header>
+      ))}
+      <a
+        href="https://www.instagram.com/edweatherheadjewellery/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="site-nav-icon-link"
+        aria-label="Instagram"
+      >
+        <span className="icon-instagram" />
+      </a>
+    </nav>
   );
 }
