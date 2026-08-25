@@ -1,6 +1,5 @@
 .site-footer {
   position: relative;
-  z-index: 1;
   border-top: 1px solid var(--color-border);
   margin-top: var(--space-6);
   padding: var(--space-4) 0;

@@ -1,4 +1,4 @@
-.about-section {
+section.about-section {
   position: relative;
   z-index: 1;
   padding: var(--space-5) var(--space-3);
