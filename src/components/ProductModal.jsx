@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import './ProductModal.css';
+import './ProductCard.css';
 
 function leadingZero(n) {
   return (n < 10 ? '0' : '') + n;
@@ -31,6 +32,10 @@ export default function ProductModal({ product, onClose }) {
         </button>
         <h2>{product.title}</h2>
         {product.sold && <p className="modal-sold">Sold</p>}
+        <div className="product-card-meta">
+          {product.stone.map((tag) => <span key={tag}>{tag}</span>)}
+          {product.metal.map((tag) => <span key={tag}>{tag}</span>)}
+        </div>
         <p>{product.descr}</p>
         {/* {!product.sold && product.price && (
           <p className="modal-price">${product.price}</p>

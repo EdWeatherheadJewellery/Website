@@ -107,11 +107,11 @@ function ProductListView({ items }) {
     [items]
   );
   const metalOptions = useMemo(
-    () => [...new Set(items.map((p) => p.metal).filter(Boolean))],
+    () => [...new Set(items.flatMap((p) => p.metal))],
     [items]
   );
   const stoneOptions = useMemo(
-    () => [...new Set(items.map((p) => p.stone).filter(Boolean))],
+    () => [...new Set(items.flatMap((p) => p.stone))],
     [items]
   );
 
@@ -123,8 +123,8 @@ function ProductListView({ items }) {
   // Across groups — type, metal, stone — results are AND'd together.
   const filtered = items.filter((p) => {
     if (type !== 'all' && p.type !== type) return false;
-    if (metals.length > 0 && !metals.includes(p.metal)) return false;
-    if (stones.length > 0 && !stones.includes(p.stone)) return false;
+    if (metals.length > 0 && !metals.some((m) => p.metal.includes(m))) return false;
+    if (stones.length > 0 && !stones.some((s) => p.stone.includes(s))) return false;
     return true;
   });
 
@@ -137,7 +137,8 @@ function ProductListView({ items }) {
       case 'price-asc':
         return (Number(a.price) || 0) - (Number(b.price) || 0);
       case 'metal':
-        return (a.metal || '').localeCompare(b.metal || '');
+        // Multi-metal products sort by their first listed metal.
+        return (a.metal[0] || '').localeCompare(b.metal[0] || '');
       case 'recent':
       default:
         return b.refnumber - a.refnumber;
