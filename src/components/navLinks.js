@@ -3,7 +3,6 @@
 export const navLinks = [
   { to: '/', label: 'Home', end: true },
   { to: '/shop', label: 'Jewellery' },
-  { to: '/archive', label: 'Archive' },
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
 ];

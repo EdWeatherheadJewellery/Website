@@ -91,7 +91,7 @@ a:hover, a:active {
   padding: 0 var(--space-3);
 }
 
-/* Page-level sections (Home, Shop, Archive, About, Contact all render
+/* Page-level sections (Home, Jewellery, About, Contact all render
    <section className="container">). More specific than .container alone,
    so this applies on top of it without touching the div-based containers
    used by Navbar/Hero/Footer (which have their own flex/grid layouts and

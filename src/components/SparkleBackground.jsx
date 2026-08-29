@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './SparkleBackground.css';
 
 // The two changes for React:
@@ -30,9 +30,22 @@ const THRESHOLD = 50;  // A higher number makes sparkles stay visible for longer
 
 export default function SparkleBackground() {
   const hostRef = useRef(null);
+  const [reducedMotion, setReducedMotion] = useState(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+
+  useEffect(() => {
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleChange = (e) => setReducedMotion(e.matches);
+    motionQuery.addEventListener('change', handleChange);
+    return () => motionQuery.removeEventListener('change', handleChange);
+  }, []);
+
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
+    if (reducedMotion) return;
+
     const totalX = window.innerWidth;
     const totalY = window.innerHeight;
     function makeLayer(index) {
@@ -97,6 +110,6 @@ export default function SparkleBackground() {
       }
       host.innerHTML = '';
     };
-  }, []);
+  }, [reducedMotion]);
   return <div ref={hostRef} className="sparkle-host" aria-hidden="true" />;
 }
