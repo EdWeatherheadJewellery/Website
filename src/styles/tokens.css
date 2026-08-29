@@ -69,7 +69,7 @@ p, li { margin: 0 0 var(--space-2); color: var(--color-navy); }
 
 a {
   color: var(--color-navy-light);
-  text-decoration: none;
+  /* text-decoration: none; */
 }
 
 a:hover, a:active {

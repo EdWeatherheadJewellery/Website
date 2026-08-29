@@ -61,7 +61,7 @@ export default function Shop() {
 
   return (
     <section className="container" style={{ position: 'relative', zIndex: 1, padding: 'var(--space-5) var(--space-3)' }}>
-      <p className="eyebrow">Shop</p>
+      <p className="eyebrow">Jewellery</p>
       {/* <h1 style={{ fontSize: 'var(--size-xl)' }}>Browse in-house pieces</h1> */}
       <h1 style={{ fontSize: 'var(--size-xl)' }}>Opening soon</h1>
 

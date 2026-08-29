@@ -9,7 +9,7 @@ export default function ArchiveCard({ product }) {
   const [index, setIndex] = useState(0);
   const photos = Array.from(
     { length: product.pics },
-    (_, i) => `/photos/${product.name}_${leadingZero(i + 1)}.jpg`
+    (_, i) => `/gallery/${product.name}_${leadingZero(i + 1)}.jpg`
   );
 
   const hasMultiple = photos.length > 1;

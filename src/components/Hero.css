@@ -64,7 +64,7 @@
   height: 100%;
   margin: 0;
   border: 1px solid var(--color-border);
-  background-image: url('/photos/Hero.jpg');
+  background-image: url('/images/Hero.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -20,7 +20,7 @@ export default function ProductModal({ product, onClose }) {
 
   const photos = Array.from(
     { length: product.pics },
-    (_, i) => `/photos/${product.name}_${leadingZero(i + 1)}.jpg`
+    (_, i) => `/gallery/${product.name}_${leadingZero(i + 1)}.jpg`
   );
 
   return (

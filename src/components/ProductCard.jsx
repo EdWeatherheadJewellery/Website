@@ -1,7 +1,7 @@
 import './ProductCard.css';
 
 export default function ProductCard({ product, onOpen }) {
-  const thumb = `/photos/${product.name}_01.jpg`;
+  const thumb = `/gallery/${product.name}_01.jpg`;
 
   return (
     <button className="product-card" onClick={() => onOpen(product)}>

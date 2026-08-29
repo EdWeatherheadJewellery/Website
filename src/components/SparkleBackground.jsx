@@ -9,20 +9,24 @@ import './SparkleBackground.css';
 const COLORS = [
   '#FFFFFF',
   '#FFFFFF',
-  'hsl(300, 80%, 96%)', //magenta
-  'hsl(60, 80%, 91%)',  //yellow
-  'hsl(120, 80%, 93%)', //green
-  'hsl(0, 80%, 97%)',  //red
-  'hsl(180, 80%, 92%)',  //cyan
-  'hsl(240, 80%, 97%)', //blue
+
+  'hsl(33, 30%, 93%)',
+  'hsl(141, 40%, 93%)',
+
+  // 'hsl(300, 80%, 96%)', //magenta
+  // 'hsl(60, 80%, 91%)',  //yellow
+  // 'hsl(120, 80%, 93%)', //green
+  // 'hsl(0, 80%, 97%)',  //red
+  // 'hsl(180, 80%, 92%)',  //cyan
+  // 'hsl(240, 80%, 97%)', //blue
 ];
 
 const SPARKLES_PER_LAYER = 10;
-const SPARKLE_SIZE_INCREASE = 1;
-const LAYERS = 10;
-const RARITY_MIN = 100;
-const RARITY_MAX = 100;
-const THRESHOLD = 30;
+const SPARKLE_SIZE_INCREASE = 1;  // multiplier to adjut the average size of sparkles
+const LAYERS = 10;  // number of layers (more layers leads to more variety)
+const RARITY_MIN = 1000; // Multiplier; A higher number means it's rarer to see sparkles appear
+const RARITY_MAX = 100; // Gets added after multiplying; A higher number makes it even rarer to see sparkles appear
+const THRESHOLD = 50;  // A higher number makes sparkles stay visible for longer
 
 export default function SparkleBackground() {
   const hostRef = useRef(null);
