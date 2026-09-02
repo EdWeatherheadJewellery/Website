@@ -41,9 +41,9 @@ Questions I ask myself when designing a piece:
         <p>
           Do you have a specific piece in mind? I accept commission requests for custom pieces. Bring your own minerals, or choose from my in-house selection. <Link to="/contact">Drop me a line</Link> and let me know what you have in mind.
         </p>
-        <p>
+        {/* <p>
           I have experience working with shamans and healers, and can make specific tools with the required minerals, symbols and intentions. I am attuned as a reiki channel.
-        </p>
+        </p> */}
 
       </div>
     </section>

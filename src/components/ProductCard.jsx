@@ -15,7 +15,7 @@ export default function ProductCard({ product, onOpen }) {
         <div className="product-card-meta">
           {product.stone.map((tag) => <span key={tag}>{tag}</span>)}
           {product.metal.map((tag) => <span key={tag}>{tag}</span>)}
-          {!product.sold && !product.archived && product.price && <span className="product-card-price">${product.price}</span>}
+          {/* {!product.sold && !product.archived && product.price && <span className="product-card-price">${product.price}</span>} */}
         </div>
       </div>
     </button>

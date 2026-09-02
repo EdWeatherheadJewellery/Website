@@ -3,7 +3,8 @@ import ProductGrid from '../components/ProductGrid';
 import { activeProducts } from '../data/products';
 
 export default function Home() {
-  const featured = activeProducts().slice(0, 3);
+  // const featured = activeProducts().slice(0, 3);
+  const featured = activeProducts().slice(13, 16);
 
   return (
     <>

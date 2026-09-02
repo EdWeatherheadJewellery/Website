@@ -62,11 +62,16 @@
   object-fit: cover;
   border-radius: var(--radius);
   display: block;
+  width: 100%;
 }
+
+.modal-descr { white-space: pre-line; }
 
 @media (min-width: 641px) {
   .modal-img {
-    flex-basis: 15rem;
-    min-width: 15rem;
+    /* flex-basis: 15rem; */
+    /* min-width: 20rem; */
+    width: 20rem;
+    max-width: 49%;
   }
 }

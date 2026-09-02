@@ -21,7 +21,7 @@ const COLORS = [
   // 'hsl(240, 80%, 97%)', //blue
 ];
 
-const SPARKLES_PER_LAYER = 10;
+const SPARKLES_PER_LAYER = 15;
 const SPARKLE_SIZE_INCREASE = 1;  // multiplier to adjut the average size of sparkles
 const LAYERS = 10;  // number of layers (more layers leads to more variety)
 const RARITY_MIN = 1000; // Multiplier; A higher number means it's rarer to see sparkles appear
@@ -44,7 +44,7 @@ export default function SparkleBackground() {
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
-    if (reducedMotion) return;
+    // if (reducedMotion) return;
 
     const totalX = window.innerWidth;
     const totalY = window.innerHeight;
@@ -110,6 +110,7 @@ export default function SparkleBackground() {
       }
       host.innerHTML = '';
     };
-  }, [reducedMotion]);
+  // }, [reducedMotion]);
+  }, []);
   return <div ref={hostRef} className="sparkle-host" aria-hidden="true" />;
 }

@@ -36,7 +36,7 @@ export default function ProductModal({ product, onClose }) {
           {product.stone.map((tag) => <span key={tag}>{tag}</span>)}
           {product.metal.map((tag) => <span key={tag}>{tag}</span>)}
         </div>
-        <p>{product.descr}</p>
+        <p className='modal-descr'>{product.descr}</p>
         {/* {!product.sold && product.price && (
           <p className="modal-price">${product.price}</p>
         )} */}
