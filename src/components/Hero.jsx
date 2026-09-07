@@ -6,12 +6,18 @@ export default function Hero() {
     <section className="hero">
       <div className="container hero-inner">
         <div className="hero-text">
-          <p className="eyebrow">Hand-made jewellery</p>
-          {/* <h1>Thoughtfully designed & built to last</h1> */}
-          <h1>Natural minerals, custom designs</h1>
+
+          {/* <p className="eyebrow">Hand-made jewellery</p> */}
+          <p className="eyebrow">Sterling silver • Natural minerals</p>
+          {/* <p className="eyebrow">Minerals & Symbols</p> */}
+
+          <h1>One-of-a-kind hand-made jewellery</h1>
+          {/* <h1>Natural minerals, custom designs</h1> */}
+
           <p className="hero-sub">
 Solid sterling silver, natural untreated minerals and gemstones, and freshwater pearls, constructed with care into pieces designed to be worn and enjoyed for years.
           </p>
+
           <div className="hero-actions">
             <Link to="/shop" className="hero-btn hero-btn-primary">Shop the collection</Link>
             <Link to="/contact" className="hero-btn hero-btn-secondary">Request a custom piece</Link>

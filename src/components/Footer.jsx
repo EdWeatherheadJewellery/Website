@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="container footer-inner">
         <Navbar />
         <p className="eyebrow">Handmade • Created with care</p>
-        <p>&copy; {new Date().getFullYear()} Ed Weatherhead Jewellery. All pieces made by hand.</p>
+        <p>&copy; {new Date().getFullYear()} Ed Weatherhead Jewellery • ABN 75218463253</p>
       </div>
     </footer>
   );

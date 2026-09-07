@@ -28,5 +28,11 @@
 }
 
 @media (max-width: 720px) {
-  .site-header-inner { flex-direction: column; height: auto; padding: var(--space-2) 0; gap: var(--space-1); }
+  .site-header-inner {
+    flex-direction: column;
+    height: auto;
+    padding: var(--space-2) 0;
+    padding-top: calc(var(--space-2) + 0.5rem);
+    gap: var(--space-1);
+  }
 }

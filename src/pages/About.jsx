@@ -16,7 +16,7 @@ export default function About() {
         {/* Placeholder copy — replace with your own story. */}
 
         <p>
-Hi! I'm Ed, and I love making jewellery. I've been designing and creating one-of-a-kind pieces, using solid sterling silver and natural untreated gemstones and minerals, since 2016.
+Hi! I'm Ed, and I love making jewellery. I've been designing and creating one-of-a-kind pieces, using solid sterling silver and natural untreated gemstones and minerals, since 2019.
         </p>
 
         <p>
@@ -26,7 +26,7 @@ Each piece is thoughtfully designed and built to last. I use a combination of te
 When working with pearls, I use genuine freshwater pearls, knotted by hand onto traditional silk thread for strength and durability.
         </p>
         <p>
-I make necklaces, pendants and charms. In the near future, I'll add rings, earrings, bracelets, brooches (join my email list to receive updates).
+I make necklaces, pendants, brooches and charms. In the future, I may add rings, earrings, bracelets (join my email list to receive updates).
         </p>
         <p>
 Questions I ask myself when designing a piece:

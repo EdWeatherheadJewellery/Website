@@ -7,7 +7,11 @@ export default function ProductCard({ product, onOpen }) {
     <button className="product-card" onClick={() => onOpen(product)}>
       <div className="product-card-image-wrap">
         <img src={thumb} alt={product.title} className="product-card-image" loading="lazy" />
-        {product.sold && <span className="product-card-sold">Sold</span>}
+        {product.commission ? (
+          <span className="product-card-badge product-card-commission">By request</span>
+        ) : (
+          product.sold && <span className="product-card-badge product-card-sold">Sold</span>
+        )}
         <span className="product-card-zoom">View gallery</span>
       </div>
       <div className="product-card-body">

@@ -185,7 +185,12 @@ function ProductListView({ items }) {
             </div>
           </details>
 
-          <FilterGroup title="Metal" options={metalOptions} selected={metals} onToggle={(v) => toggle(metals, setMetals, v)} />
+          <FilterGroup
+            title="Metal"
+            options={metalOptions}
+            selected={metals}
+            onToggle={(v) => setMetals((prev) => (prev.length === 1 && prev[0] === v ? [] : [v]))}
+          />
           <StoneFilter options={stoneOptions} selected={stones} onToggle={(v) => toggle(stones, setStones, v)} />
         </div>
       </details>
