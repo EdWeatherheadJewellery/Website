@@ -3,6 +3,7 @@
   border-bottom: 1px solid var(--color-border);
   background: var(--color-background);
   backdrop-filter: blur(6px);
+  margin-top: 0;
 }
 
 .site-header-inner {
@@ -28,11 +29,16 @@
 }
 
 @media (max-width: 720px) {
+  .site-header {
+    margin-top: var(--space-1);
+  }
   .site-header-inner {
     flex-direction: column;
     height: auto;
     padding: var(--space-2) 0;
     padding-top: calc(var(--space-2) + 0.5rem);
     gap: var(--space-1);
+    margin-top: 3rem;
   }
 }
+

@@ -1,6 +1,7 @@
 .site-nav {
   display: flex;
   gap: var(--space-3);
+  align-items: center;
 }
 
 .site-nav-link {
@@ -29,6 +30,7 @@
 
 .site-nav-icon-link .icon-instagram {
   display: block;
+  margin-bottom: var(--space-1);
   height: 1.875rem;
   width: 1.875rem;
   background-color: var(--color-sage);

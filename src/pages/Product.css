@@ -1,0 +1,147 @@
+.product-page-back {
+  display: inline-block;
+  margin-bottom: var(--space-3);
+  font-size: var(--size-sm);
+  color: var(--color-navy-light);
+  text-decoration: none;
+}
+
+.product-page-back:hover {
+  color: var(--color-sage-light);
+}
+
+.product-page-badge {
+  display: inline-block;
+  color: var(--color-cards);
+  font-size: var(--size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  margin-bottom: var(--space-2);
+}
+
+.product-page-sold {
+  background: var(--color-red);
+}
+
+.product-page-commission {
+  background: var(--color-navy-light);
+}
+
+.product-page-price {
+  color: var(--color-navy-light);
+  font-weight: 600;
+  font-size: var(--size-md);
+  margin-top: var(--space-2);
+}
+
+.product-page-descr {
+  white-space: pre-line;
+  margin-top: var(--space-3);
+  max-width: 60ch;
+}
+
+
+
+
+
+.product-page-gallery {
+  margin-top: var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.product-page-img-btn {
+  flex: 1 1 10rem;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+  display: block;
+}
+
+.product-page-img {
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: var(--radius);
+  display: block;
+  width: 100%;
+  transition: opacity 0.15s ease;
+}
+
+@media (min-width: 641px) {
+  .product-page-img-btn {
+    flex-basis: 15rem;
+    max-width: 49%;
+  }
+}
+
+
+
+
+.product-page-img-btn:hover .product-page-img,
+.product-page-img-btn:focus-visible .product-page-img {
+  opacity: 0.85;
+}
+
+/* --- Lightbox --- */
+
+.lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 17, 15, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  padding: var(--space-3);
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: var(--radius);
+  cursor: default;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-3);
+  background: none;
+  border: none;
+  color: var(--color-cards);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.lightbox-close:hover {
+  opacity: 0.8;
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-cards);
+  font-size: 3rem;
+  line-height: 1;
+  padding: var(--space-2);
+}
+
+.lightbox-nav:hover {
+  opacity: 0.8;
+}
+
+.lightbox-prev {
+  left: var(--space-2);
+}
+
+.lightbox-next {
+  right: var(--space-2);
+}

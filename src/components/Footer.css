@@ -1,7 +1,7 @@
 .site-footer {
   position: relative;
   border-top: 1px solid var(--color-border);
-  margin-top: var(--space-6);
+  margin-top: var(--space-5);
   padding: var(--space-4) 0;
 }
 

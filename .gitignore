@@ -3,3 +3,5 @@ jewellery-site.zip
 /scratch
 /node_modules/
 /public/gallery/backup_before_resizing/
+dist.zip
+/dist/

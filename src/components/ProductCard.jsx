@@ -1,10 +1,11 @@
+import { Link } from 'react-router-dom';
 import './ProductCard.css';
 
-export default function ProductCard({ product, onOpen }) {
+export default function ProductCard({ product }) {
   const thumb = `/gallery/${product.name}_01.jpg`;
 
   return (
-    <button className="product-card" onClick={() => onOpen(product)}>
+    <Link to={`/shop/${product.name}`} className="product-card">
       <div className="product-card-image-wrap">
         <img src={thumb} alt={product.title} className="product-card-image" loading="lazy" />
         {product.commission ? (
@@ -12,7 +13,7 @@ export default function ProductCard({ product, onOpen }) {
         ) : (
           product.sold && <span className="product-card-badge product-card-sold">Sold</span>
         )}
-        <span className="product-card-zoom">View gallery</span>
+        <span className="product-card-zoom">View details</span>
       </div>
       <div className="product-card-body">
         <h3>{product.title}</h3>
@@ -22,6 +23,6 @@ export default function ProductCard({ product, onOpen }) {
           {/* {!product.sold && !product.archived && product.price && <span className="product-card-price">${product.price}</span>} */}
         </div>
       </div>
-    </button>
+    </Link>
   );
 }
