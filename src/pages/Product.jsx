@@ -127,9 +127,9 @@ export default function Product() {
         {product.metal.map((tag) => <span key={tag}>{tag}</span>)}
       </div>
 
-      {/* {!product.sold && !product.archived && product.price && (
+       {!product.sold && !product.archived && product.price && (
         <p className="product-page-price">${product.price}</p>
-      )} */}
+      )}
 
       {product.descr && <p className="product-page-descr">{product.descr}</p>}
 

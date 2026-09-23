@@ -37,9 +37,9 @@ export default function ProductModal({ product, onClose }) {
           {product.metal.map((tag) => <span key={tag}>{tag}</span>)}
         </div>
         <p className='modal-descr'>{product.descr}</p>
-        {/* {!product.sold && product.price && (
+        {!product.sold && product.price && (
           <p className="modal-price">${product.price}</p>
-        )} */}
+        )}
         <div className="modal-gallery">
           {photos.map((src, i) => (
             <img key={src} src={src} alt={`${product.title} — photo ${i + 1}`} className="modal-img" loading="lazy" />
