@@ -8,7 +8,8 @@
   --color-navy-muted: #37414F;
   --color-sage: #6E8074;
   --color-sage-light: #7ea48b;
-  --color-background: #fdf9f2;
+  /* --color-background: #fdf9f2; */
+  --color-background: #f9f5f2;
   --color-cards: #FFFFFF;
   --color-border: #D0C7BC;
   --color-red: #7C4038;
@@ -124,4 +125,19 @@ button {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
   html { scroll-behavior: auto; }
+}
+
+/* Visually hides content while keeping it available to screen readers —
+   used for live-region status messages (e.g. "added to cart") that
+   shouldn't take up visible space. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

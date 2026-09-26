@@ -10,21 +10,28 @@
 //      (use your Stripe *secret* key — starts with sk_test_... while
 //      testing, sk_live_... once you're ready to go live). Never put this
 //      key in frontend code.
-//   3. Update SUCCESS_URL, CANCEL_URL and ALLOWED_ORIGIN below once your
-//      site's real domain is live (they're already set to it here).
+//   3. SUCCESS_URL, CANCEL_URL and ALLOWED_ORIGIN below are derived
+//      automatically from Netlify's process.env.URL — no need to edit them
+//      for local dev vs. production, they just adapt.
 //   4. Update SHIPPING_COUNTRIES if you ship outside Australia.
 //   5. Once deployed, call this function from your cart's checkout button
 //      — see the usage note at the bottom of this file.
 
 import Stripe from 'stripe';
 import { products } from '../../src/data/products.js';
+import { SHIPPING_COUNTRIES, calculateShipping } from '../../src/data/shipping.js';
+import { reserveItems, releaseItems } from './lib/inventory.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-const ALLOWED_ORIGIN = 'https://edweatherheadjewellery.com/';
-const SUCCESS_URL = 'https://edweatherheadjewellery.com/order-success';
-const CANCEL_URL = 'https://edweatherheadjewellery.com/cart';
-const SHIPPING_COUNTRIES = ['AU']; // TODO: add more ISO country codes if you ship internationally, e.g. 'NZ', 'US'
+// Netlify sets process.env.URL to whatever the current context actually is:
+// http://localhost:8888 under `netlify dev`, or your real domain once
+// deployed — so these adapt automatically instead of always pointing at
+// production. Falls back to the live domain if that variable is ever unset.
+const SITE_URL = process.env.URL || 'https://edweatherheadjewellery.com';
+const ALLOWED_ORIGIN = SITE_URL;
+const SUCCESS_URL = `${SITE_URL}/order-success`;
+const CANCEL_URL = `${SITE_URL}/cart`;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
@@ -95,13 +102,46 @@ export const handler = async (event) => {
     });
   }
 
+  // Reserve every item before we let Stripe take payment — this is what
+  // actually stops two customers both successfully paying for the same
+  // one-of-a-kind piece. If anything in the cart is already held by
+  // another in-progress or completed purchase, nothing is charged.
+  const refnumbers = line_items.map((li) => li.price_data.product_data.metadata.refnumber);
+  const reservation = await reserveItems(refnumbers, { method: 'card' });
+
+  if (!reservation.ok) {
+    const unavailableProduct = products.find((p) => p.refnumber === reservation.unavailable);
+    return {
+      statusCode: 409,
+      headers: corsHeaders,
+      body: JSON.stringify({
+        error: `${unavailableProduct?.title || 'One of these items'} was just purchased by someone else. Please remove it from your cart and try again.`,
+      }),
+    };
+  }
+
+  // Shipping is calculated from the real (server-priced) subtotal, not
+  // anything sent by the browser.
+  const subtotal = line_items.reduce((sum, li) => sum + (li.price_data.unit_amount / 100) * li.quantity, 0);
+  const shippingAmount = calculateShipping(subtotal);
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items,
       success_url: `${SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: CANCEL_URL,
+      metadata: { refnumbers: JSON.stringify(refnumbers) }, // read back by stripe-webhook.js once payment succeeds
       shipping_address_collection: { allowed_countries: SHIPPING_COUNTRIES },
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: Math.round(shippingAmount * 100), currency: 'aud' },
+            display_name: shippingAmount === 0 ? 'Free shipping' : 'Flat rate shipping',
+          },
+        },
+      ],
     });
 
     return {
@@ -110,6 +150,9 @@ export const handler = async (event) => {
       body: JSON.stringify({ url: session.url }),
     };
   } catch (err) {
+    // The reservation succeeded but Stripe itself failed — release the
+    // hold rather than leaving it locked for nothing until it expires.
+    await releaseItems(refnumbers);
     return {
       statusCode: 500,
       headers: corsHeaders,

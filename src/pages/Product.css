@@ -91,7 +91,8 @@
 .lightbox-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(20, 17, 15, 0.92);
+  /* background: rgba(20, 17, 15, 0.92); */
+  background: rgba(20, 17, 15, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import Navbar from './Navbar';
+import MobileNav from './MobileNav';
 import './Header.css';
 
 export default function Header() {
@@ -11,7 +12,10 @@ export default function Header() {
           Ed Weatherhead Jewellery
           {/* Your Jewellery Business */}
         </NavLink>
-        <Navbar />
+        <div className="site-header-nav-desktop">
+          <Navbar />
+        </div>
+        <MobileNav />
       </div>
     </header>
   );

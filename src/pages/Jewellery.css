@@ -118,8 +118,12 @@
   }
 
   .filter-group-wrapper-content {
-    display: block;
+    display: none;
     margin-top: var(--space-2);
+  }
+
+  .filter-group-wrapper[open] > .filter-group-wrapper-content {
+    display: block;
   }
 
   .filter-group-wrapper .filter-group {

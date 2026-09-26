@@ -4,6 +4,7 @@
   background: var(--color-background);
   backdrop-filter: blur(6px);
   margin-top: 0;
+  z-index: 2;
 }
 
 .site-header-inner {
@@ -39,6 +40,9 @@
     padding-top: calc(var(--space-2) + 0.5rem);
     gap: var(--space-1);
     margin-top: 3rem;
+  }
+  .site-header-nav-desktop {
+    display: none;
   }
 }
 

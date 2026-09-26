@@ -6,6 +6,10 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Jewellery from './pages/Jewellery';
 import Product from './pages/Product';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import OrderSuccess from './pages/OrderSuccess';
+import ShippingReturns from './pages/ShippingReturns';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
@@ -20,6 +24,10 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Jewellery />} />
           <Route path="/shop/:name" element={<Product />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/shipping-returns" element={<ShippingReturns />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<NotFound />} />

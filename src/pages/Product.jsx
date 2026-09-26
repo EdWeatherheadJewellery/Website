@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { products } from '../data/products';
+import AddToCartButton from '../components/AddToCartButton';
 import '../components/ProductCard.css';
 import './Product.css';
 
@@ -127,9 +128,11 @@ export default function Product() {
         {product.metal.map((tag) => <span key={tag}>{tag}</span>)}
       </div>
 
-       {!product.sold && !product.archived && product.price && (
+       {/* {!product.sold && !product.archived && product.price && (
         <p className="product-page-price">${product.price}</p>
-      )}
+      )} */}
+
+      {/* <AddToCartButton product={product} /> */}
 
       {product.descr && <p className="product-page-descr">{product.descr}</p>}
 

@@ -23,6 +23,26 @@
   border-bottom-color: var(--color-sage-light);
 }
 
+.site-nav-cart {
+  position: relative;
+}
+
+.site-nav-cart-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.3rem;
+  margin-left: 0.35rem;
+  border-radius: 999px;
+  background: var(--color-sage);
+  color: var(--color-background);
+  font-size: 0.7rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
 .site-nav-icon-link {
   display: flex;
   align-items: center;

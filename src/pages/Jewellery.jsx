@@ -145,6 +145,10 @@ function ProductListView({ items }) {
     }
   });
 
+  console.log(filtersOpen);
+
+
+
   return (
     <>
       <div className="sort-control">
@@ -216,8 +220,8 @@ export default function Jewellery() {
   return (
     <section className="container" style={{ position: 'relative', zIndex: 1, padding: 'var(--space-5) var(--space-3)' }}>
       <p className="eyebrow">Jewellery</p>
-      {/* <h1 style={{ fontSize: 'var(--size-xl)' }}>Browse in-house pieces</h1> */}
-      <h1 style={{ fontSize: 'var(--size-xl)' }}>Opening soon</h1>
+      <h1 style={{ fontSize: 'var(--size-xl)' }}>Browse the gallery</h1>
+      {/* <h1 style={{ fontSize: 'var(--size-xl)' }}>Opening soon</h1> */}
 
       <div className="jewellery-tabs" role="tablist">
         {TABS.map((tab) => (

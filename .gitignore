@@ -5,3 +5,5 @@ jewellery-site.zip
 /public/gallery/backup_before_resizing/
 dist.zip
 /dist/
+# Local Netlify folder
+.netlify

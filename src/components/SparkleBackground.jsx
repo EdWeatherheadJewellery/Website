@@ -8,10 +8,10 @@ import './SparkleBackground.css';
 
 const COLORS = [
   '#FFFFFF',
-  '#FFFFFF',
+  // '#FFFFFF',
 
-  'hsl(33, 30%, 93%)',
-  'hsl(141, 40%, 93%)',
+  // 'hsl(33, 30%, 93%)',
+  // 'hsl(141, 40%, 93%)',
 
   // 'hsl(300, 80%, 96%)', //magenta
   // 'hsl(60, 80%, 91%)',  //yellow

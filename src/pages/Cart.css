@@ -1,0 +1,117 @@
+.cart-empty {
+  padding: var(--space-3) 0;
+}
+
+.cart-list {
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 6rem 1fr auto;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cart-item-image-link {
+  display: block;
+}
+
+.cart-item-image {
+  width: 6rem;
+  height: 6rem;
+  object-fit: cover;
+  border-radius: var(--radius);
+  display: block;
+}
+
+.cart-item-body {
+  min-width: 0;
+}
+
+.cart-item-title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--size-md);
+  text-decoration: none;
+  color: var(--color-navy-light);
+}
+
+.cart-item-price {
+  margin: var(--space-1) 0 0;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.cart-item-remove {
+  background: none;
+  border: none;
+  color: var(--color-red);
+  text-decoration: underline;
+  font-size: var(--size-sm);
+  min-height: 44px;
+  padding: 0 var(--space-1);
+  align-self: start;
+}
+
+.cart-item-remove:hover {
+  color: var(--color-sage-light);
+}
+
+.cart-summary {
+  max-width: 24rem;
+  margin-left: auto;
+  padding: var(--space-3);
+  background: var(--color-cards);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.cart-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--size-md);
+  margin-bottom: var(--space-1);
+}
+
+.cart-summary-total {
+  font-weight: 600;
+}
+
+.cart-summary-note {
+  font-size: var(--size-xs);
+  color: var(--color-navy-muted);
+}
+
+.cart-checkout-button {
+  width: 100%;
+  display: block;
+  text-align: center;
+  margin: var(--space-2) 0;
+}
+
+.cart-continue-shopping {
+  display: block;
+  text-align: center;
+  font-size: var(--size-sm);
+}
+
+@media (max-width: 640px) {
+  .cart-item {
+    grid-template-columns: 4.5rem 1fr;
+  }
+  .cart-item-remove {
+    grid-column: 2;
+    justify-self: start;
+    padding-left: 0;
+  }
+  .cart-summary {
+    margin-left: 0;
+    max-width: none;
+  }
+}

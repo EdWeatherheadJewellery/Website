@@ -1,6 +1,8 @@
+import { Link } from 'react-router-dom';
 import Hero from '../components/Hero';
 import ProductGrid from '../components/ProductGrid';
 import { activeProducts } from '../data/products';
+import './Home.css';
 
 export default function Home() {
   // const featured = activeProducts().slice(0, 3);
@@ -13,6 +15,9 @@ export default function Home() {
         <p className="eyebrow">Recently made</p>
         <h2>A few pieces from the workshop</h2>
         <ProductGrid products={featured} />
+        <p className="home-shop-link-wrap">
+          <Link to="/shop" className="home-shop-link">Shop the collection ›</Link>
+        </p>
       </section>
     </>
   );
