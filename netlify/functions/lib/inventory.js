@@ -34,7 +34,15 @@ function store() {
   // "strong" consistency trades a little read latency for reads that are
   // guaranteed up to date — worth it here, since this store exists
   // specifically to make correctness decisions, not for fast display data.
-  return getStore({ name: 'inventory-holds', consistency: 'strong' });
+  //
+  // Local `netlify dev` doesn't currently populate the extra config strong
+  // consistency needs when running classic (Lambda-compatibility) functions,
+  // so it always fails locally with "not been configured with a
+  // 'uncachedEdgeURL' property". It works fine once deployed. Locally there's
+  // only a single process anyway (no distributed edge network), so eventual
+  // consistency behaves identically there — this fallback costs nothing.
+  const consistency = process.env.NETLIFY_DEV ? 'eventual' : 'strong';
+  return getStore({ name: 'inventory-holds', consistency });
 }
 
 // Tries to reserve every refnumber, all-or-nothing. Returns { ok: true } if
@@ -42,7 +50,7 @@ function store() {
 // the first item that couldn't be reserved (already sold, or already held
 // by someone else's still-active reservation) so the caller can show a
 // clear error instead of silently dropping it.
-export async function reserveItems(refnumbers, { method, reference } = {}) {
+export async function reserveItems(refnumbers, { method, reference, holderId } = {}) {
   const claimed = [];
 
   for (const refnumber of refnumbers) {
@@ -50,6 +58,7 @@ export async function reserveItems(refnumbers, { method, reference } = {}) {
       status: 'reserved',
       method,
       reference,
+      holderId,
       expiresAt: Date.now() + (method === 'payid' ? PAYID_HOLD_MS : RESERVATION_MS),
     };
 
@@ -60,13 +69,19 @@ export async function reserveItems(refnumbers, { method, reference } = {}) {
       continue;
     }
 
-    // Something's already there. The only way we're allowed to take it is
-    // if it's a reservation (never a permanent "sold" record) and its own
-    // expiry time has passed.
+    // Something's already there. We're allowed to take it over if either:
+    //   - it's a reservation (never a permanent "sold" record) whose own
+    //     expiry time has passed, or
+    //   - it's a still-active reservation, but one placed by this exact same
+    //     customer (matching holderId) — e.g. they clicked Stripe's back
+    //     button and are now retrying. This also refreshes their expiry.
+    // A still-active hold belonging to anyone else is never reclaimable.
     const existing = await store().getWithMetadata(refnumber, { type: 'json' });
-    const isExpired = existing?.data?.status === 'reserved' && existing.data.expiresAt < Date.now();
+    const isReservation = existing?.data?.status === 'reserved';
+    const isExpired = isReservation && existing.data.expiresAt < Date.now();
+    const isOwnActiveHold = isReservation && holderId && existing.data.holderId === holderId;
 
-    if (isExpired) {
+    if (isExpired || isOwnActiveHold) {
       const { modified: reclaimed } = await store().setJSON(refnumber, hold, { onlyIfMatch: existing.etag });
       if (reclaimed) {
         claimed.push(refnumber);

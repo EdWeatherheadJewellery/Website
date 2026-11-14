@@ -13,6 +13,17 @@ function leadingZero(n) {
   return (n < 10 ? '0' : '') + n;
 }
 
+// Only nudge the page down to <main> if the header is still (at least
+// partly) in view — if the user has already scrolled past it, leave the
+// scroll position alone.
+function scrollToMainIfHeaderVisible() {
+  const header = document.querySelector('.site-header');
+  const main = document.querySelector('main');
+  if (header && main && header.getBoundingClientRect().bottom > 0) {
+    main.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
 function Lightbox({ photos, index, onClose, onChange }) {
   useEffect(() => {
     function onKey(e) {
@@ -80,10 +91,6 @@ export default function Product() {
   const { name } = useParams();
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [name]);
-
   const product = products.find((p) => p.name === name);
 
   if (!product) {
@@ -117,11 +124,11 @@ export default function Product() {
       <p className="eyebrow">Jewellery</p>
       <h1 style={{ fontSize: 'var(--size-xl)' }}>{product.title}</h1>
 
-      {product.commission ? (
+      {/* {product.commission ? (
         <p className="product-page-badge product-page-commission">Available by request</p>
       ) : (
         product.sold && <p className="product-page-badge product-page-sold">Sold</p>
-      )}
+      )} */}
 
       <div className="product-card-meta">
         {product.stone.map((tag) => <span key={tag}>{tag}</span>)}
@@ -129,10 +136,10 @@ export default function Product() {
       </div>
 
        {/* {!product.sold && !product.archived && product.price && (
-        <p className="product-page-price">${product.price}</p>
-      )} */}
+         <p className="product-page-price">${product.price}</p>
+        )} */}
 
-      {/* <AddToCartButton product={product} /> */}
+      <AddToCartButton product={product} />
 
       {product.descr && <p className="product-page-descr">{product.descr}</p>}
 
@@ -142,7 +149,7 @@ export default function Product() {
             key={src}
             type="button"
             className="product-page-img-btn"
-            onClick={() => setLightboxIndex(i)}
+            onClick={() => { setLightboxIndex(i); scrollToMainIfHeaderVisible(); }}
             aria-label={`View photo ${i + 1} of ${product.title} full size`}
           >
             <img src={src} alt={`${product.title} — photo ${i + 1}`} className="product-page-img" loading="lazy" />

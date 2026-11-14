@@ -10,7 +10,6 @@ export default function Header() {
         <NavLink to="/" className="site-header-brand" end>
           <img src="../images/logo.svg" />
           Ed Weatherhead Jewellery
-          {/* Your Jewellery Business */}
         </NavLink>
         <div className="site-header-nav-desktop">
           <Navbar />

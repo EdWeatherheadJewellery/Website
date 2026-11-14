@@ -18,6 +18,7 @@
 //      — see the usage note at the bottom of this file.
 
 import Stripe from 'stripe';
+import { connectLambda } from '@netlify/blobs';
 import { products } from '../../src/data/products.js';
 import { SHIPPING_COUNTRIES, calculateShipping } from '../../src/data/shipping.js';
 import { reserveItems, releaseItems } from './lib/inventory.js';
@@ -40,6 +41,12 @@ const corsHeaders = {
 };
 
 export const handler = async (event) => {
+  // Netlify Blobs doesn't auto-configure itself when a function runs in
+  // Lambda-compatibility mode (the classic `handler` syntax used here) —
+  // this wires up the current site/token so reserveItems/releaseItems
+  // below can actually reach the blob store instead of throwing.
+  connectLambda(event);
+
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: corsHeaders, body: '' };
   }
@@ -55,7 +62,7 @@ export const handler = async (event) => {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid request body.' }) };
   }
 
-  const { items } = data;
+  const { items, cartSessionId } = data;
 
   if (!Array.isArray(items) || items.length === 0) {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'No items in cart.' }) };
@@ -107,7 +114,18 @@ export const handler = async (event) => {
   // one-of-a-kind piece. If anything in the cart is already held by
   // another in-progress or completed purchase, nothing is charged.
   const refnumbers = line_items.map((li) => li.price_data.product_data.metadata.refnumber);
-  const reservation = await reserveItems(refnumbers, { method: 'card' });
+  let reservation;
+  try {
+    reservation = await reserveItems(refnumbers, { method: 'card', holderId: cartSessionId });
+  } catch (err) {
+    // A blob-store failure here (misconfiguration, outage, etc.) should
+    // still come back as JSON the frontend can parse, not a raw crash.
+    return {
+      statusCode: 500,
+      headers: corsHeaders,
+      body: JSON.stringify({ error: 'Could not check item availability.', detail: err.message }),
+    };
+  }
 
   if (!reservation.ok) {
     const unavailableProduct = products.find((p) => p.refnumber === reservation.unavailable);

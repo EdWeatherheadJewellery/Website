@@ -23,11 +23,17 @@
 //      live key.
 
 import Stripe from 'stripe';
+import { connectLambda } from '@netlify/blobs';
 import { confirmSold } from './lib/inventory.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const handler = async (event) => {
+  // Wires up Netlify Blobs for this invocation — see the note in
+  // create-checkout-session.js. Without this, confirmSold() below would
+  // throw instead of turning the hold into a permanent "sold" record.
+  connectLambda(event);
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }

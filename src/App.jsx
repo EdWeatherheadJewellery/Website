@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import SparkleBackground from './components/SparkleBackground';
 import Header from './components/Header';
@@ -14,9 +15,21 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
 
+// React Router doesn't reset scroll position on navigation the way a full
+// page load does, so without this, navigating to a new page can land you
+// part-way down it if the previous page was scrolled.
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 export default function App() {
   return (
     <HelmetProvider>
+      <ScrollToTop />
       <SparkleBackground />
       <Header />
       <main>

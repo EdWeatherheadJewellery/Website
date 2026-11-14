@@ -18,6 +18,7 @@
 //   - TODO: once a domain is verified, consider also sending the customer
 //     a copy of their order + PayID instructions as a confirmation email.
 
+import { connectLambda } from '@netlify/blobs';
 import { products } from '../../src/data/products.js';
 import { calculateShipping } from '../../src/data/shipping.js';
 import { reserveItems, releaseItems } from './lib/inventory.js';
@@ -42,6 +43,11 @@ function generateReference() {
 }
 
 export const handler = async (event) => {
+  // Wires up Netlify Blobs for this invocation — see the note in
+  // create-checkout-session.js. Without this, reserveItems/releaseItems
+  // below would throw instead of placing/clearing a hold.
+  connectLambda(event);
+
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: corsHeaders, body: '' };
   }
@@ -56,7 +62,7 @@ export const handler = async (event) => {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid request body.' }) };
   }
 
-  const { items, customer, billing } = data;
+  const { items, customer, billing, cartSessionId } = data;
 
   if (!Array.isArray(items) || items.length === 0) {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'No items in cart.' }) };
@@ -124,7 +130,16 @@ export const handler = async (event) => {
   // released manually via products.js or automatically if nothing happens
   // for a few days.
   const refnumbers = orderLines.map((l) => l.refnumber);
-  const reservation = await reserveItems(refnumbers, { method: 'payid', reference });
+  let reservation;
+  try {
+    reservation = await reserveItems(refnumbers, { method: 'payid', reference, holderId: cartSessionId });
+  } catch (err) {
+    return {
+      statusCode: 500,
+      headers: corsHeaders,
+      body: JSON.stringify({ error: 'Could not check item availability.', detail: err.message }),
+    };
+  }
 
   if (!reservation.ok) {
     const unavailableProduct = products.find((p) => p.refnumber === reservation.unavailable);

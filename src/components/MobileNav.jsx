@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { navLinks } from './navLinks';
 import { useCart } from '../context/CartContext';
 import './MobileNav.css';
@@ -8,9 +9,37 @@ import './MobileNav.css';
 // any given width.
 export default function MobileNav() {
   const { count } = useCart();
+  const detailsRef = useRef(null);
+  const { pathname } = useLocation();
+
+  // Close on navigation (e.g. tapping a link inside the menu).
+  useEffect(() => {
+    if (detailsRef.current) detailsRef.current.open = false;
+  }, [pathname]);
+
+  // Close on outside click/tap, and on Escape.
+  useEffect(() => {
+    function handlePointerDown(e) {
+      const el = detailsRef.current;
+      if (el && el.open && !el.contains(e.target)) {
+        el.open = false;
+      }
+    }
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && detailsRef.current) {
+        detailsRef.current.open = false;
+      }
+    }
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   return (
-    <details className="mobile-nav">
+    <details className="mobile-nav" ref={detailsRef}>
       <summary className="mobile-nav-toggle" aria-label="Menu">
         <span className="hamburger-icon" aria-hidden="true">
           <span></span>
@@ -29,13 +58,13 @@ export default function MobileNav() {
             {l.label}
           </NavLink>
         ))}
-        <NavLink
+        {/* <NavLink
           to="/cart"
           className={({ isActive }) => 'mobile-nav-link' + (isActive ? ' is-active' : '')}
           aria-label={count > 0 ? `Cart, ${count} item${count === 1 ? '' : 's'}` : 'Cart, empty'}
         >
           Cart{count > 0 && <span className="mobile-nav-cart-count" aria-hidden="true">{count}</span>}
-        </NavLink>
+        </NavLink> */}
         <a
           href="https://www.instagram.com/edweatherheadjewellery/"
           target="_blank"

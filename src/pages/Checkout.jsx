@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useCart } from '../context/CartContext';
 import { formatAUD } from '../utils/currency';
+import { getCartSessionId } from '../utils/cartSession';
 import { calculateShipping, FREE_SHIPPING_THRESHOLD } from '../data/shipping';
 import './Checkout.css';
 
@@ -76,7 +77,10 @@ export default function Checkout() {
       const res = await fetch('/.netlify/functions/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: items.map(({ product }) => ({ refnumber: product.refnumber, quantity: 1 })) }),
+        body: JSON.stringify({
+          items: items.map(({ product }) => ({ refnumber: product.refnumber, quantity: 1 })),
+          cartSessionId: getCartSessionId(),
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error || 'Could not start checkout.');
@@ -101,6 +105,7 @@ export default function Checkout() {
           items: items.map(({ product }) => ({ refnumber: product.refnumber, quantity: 1 })),
           customer,
           billing: billingSameAsShipping ? null : billing,
+          cartSessionId: getCartSessionId(),
         }),
       });
       const data = await res.json();

@@ -66,7 +66,7 @@
   transition: transform 0.15s ease;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   .filter-group-wrapper > summary {
     cursor: pointer;
   }
@@ -92,19 +92,19 @@
   display: none;
 }
 
-/* Desktop (>=641px): no accordion effect — the wrapper's `open` state is
+/* Desktop (>=721px): no accordion effect — the wrapper's `open` state is
    driven by JS (always true here), and the "Filters" summary is hidden
    since there's nothing to toggle. */
-@media (min-width: 641px) {
+@media (min-width: 721px) {
   .filter-group-wrapper-title {
     display: none;
   }
 }
 
-/* Mobile (<641px): the WRAPPER becomes the accordion — one toggle shows/hides
+/* Mobile (<721px): the WRAPPER becomes the accordion — one toggle shows/hides
    all three filter-groups together. Individual filter-groups lose their own
    accordion effect and always show their contents. */
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   .filter-group-wrapper-title {
     display: flex;
     align-items: center;
@@ -118,12 +118,11 @@
   }
 
   .filter-group-wrapper-content {
-    display: none;
     margin-top: var(--space-2);
   }
 
-  .filter-group-wrapper[open] > .filter-group-wrapper-content {
-    display: block;
+  .filter-group-wrapper:not([open]) > .filter-group-wrapper-content {
+    display: none;
   }
 
   .filter-group-wrapper .filter-group {

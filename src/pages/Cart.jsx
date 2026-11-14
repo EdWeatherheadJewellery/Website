@@ -18,13 +18,12 @@ export default function Cart() {
       </Helmet>
 
       <p className="eyebrow">Cart</p>
-      <Link to="/shop" className="product-page-back">← Back to jewellery</Link>
       <h1 style={{ fontSize: 'var(--size-xl)' }}>Your cart</h1>
 
       {items.length === 0 ? (
         <div className="cart-empty">
           <p>Your cart is empty.</p>
-          <Link to="/shop" className="product-page-back">← Browse the jewellery</Link>
+          <Link to="/shop" className="product-page-back">← Browse jewellery</Link>
         </div>
       ) : (
         <>
@@ -57,6 +56,8 @@ export default function Cart() {
                 </button>
               </li>
             ))}
+            <li>          <Link to="/shop" className="product-page-back">← Browse jewellery</Link>
+</li>
           </ul>
 
           <div className="cart-summary">
@@ -64,7 +65,7 @@ export default function Cart() {
               <span>Subtotal</span>
               <span className="cart-summary-total">{formatAUD(subtotal)}</span>
             </div>
-            <p className="cart-summary-note">Shipping is calculated at checkout.</p>
+            {/* <p className="cart-summary-note">Shipping is calculated at checkout.</p> */}
             <button type="button" className="add-to-cart-button cart-checkout-button" onClick={() => navigate('/checkout')}>
               Proceed to checkout
             </button>

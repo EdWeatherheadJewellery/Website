@@ -92,11 +92,11 @@ function ProductListView({ items }) {
   const [sort, setSort] = useState('recent');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(
-    () => window.matchMedia('(min-width: 641px)').matches
+    () => window.matchMedia('(min-width: 721px)').matches
   );
 
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 641px)');
+    const mq = window.matchMedia('(min-width: 721px)');
     const handleChange = (e) => setIsDesktop(e.matches);
     mq.addEventListener('change', handleChange);
     return () => mq.removeEventListener('change', handleChange);
@@ -146,8 +146,6 @@ function ProductListView({ items }) {
   });
 
   console.log(filtersOpen);
-
-
 
   return (
     <>
