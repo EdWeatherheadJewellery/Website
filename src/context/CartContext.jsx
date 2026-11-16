@@ -1,12 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
-import { products } from '../data/products';
+import { useProducts } from './ProductsContext';
 
 const CartContext = createContext(null);
 const STORAGE_KEY = 'eww-cart';
 
 // Cart entries only ever store a refnumber + quantity — the source of
-// truth for price, title, availability etc. is always src/data/products.js,
-// looked up fresh on every render. That way the cart can never drift out
+// truth for price, title, availability etc. is always the product catalogue
+// loaded from the database (see ProductsContext), looked up fresh on every render. That way the cart can never drift out
 // of sync with a price change, and a sold/archived piece is caught here
 // too, not just at the payment step.
 
@@ -40,6 +40,7 @@ function reducer(state, action) {
 
 export function CartProvider({ children }) {
   const [items, dispatch] = useReducer(reducer, undefined, loadInitialState);
+  const { products, status: catalogueStatus } = useProducts();
 
   useEffect(() => {
     try {
@@ -53,16 +54,21 @@ export function CartProvider({ children }) {
   // Resolve full product details for what's in the cart, and drop
   // anything that's since sold, been archived, or no longer exists —
   // so the cart page never shows something the customer can't actually buy.
+  // Until the catalogue has loaded there is nothing to resolve against, so the
+  // cart shows nothing yet — but the saved items are never touched, so a slow
+  // or failed load can't wipe anyone's cart.
   const detailedItems = useMemo(
     () =>
-      items
+      catalogueStatus !== 'ready'
+        ? []
+        : items
         .map((i) => {
           const product = products.find((p) => p.refnumber === i.refnumber);
           if (!product || product.sold || product.archived || !product.price) return null;
           return { ...i, product };
         })
         .filter(Boolean),
-    [items]
+    [items, products, catalogueStatus]
   );
 
   const subtotal = useMemo(
@@ -74,13 +80,15 @@ export function CartProvider({ children }) {
     () => ({
       items: detailedItems,
       count: detailedItems.length,
+      loading: catalogueStatus === 'loading',
+      unavailable: catalogueStatus === 'error',
       subtotal,
       isInCart: (refnumber) => items.some((i) => i.refnumber === refnumber),
       addItem: (refnumber) => dispatch({ type: 'add', refnumber }),
       removeItem: (refnumber) => dispatch({ type: 'remove', refnumber }),
       clearCart: () => dispatch({ type: 'clear' }),
     }),
-    [detailedItems, subtotal, items]
+    [detailedItems, subtotal, items, catalogueStatus]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

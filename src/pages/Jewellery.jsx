@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import ProductGrid from '../components/ProductGrid';
-import { products, activeProducts, archivedProducts } from '../data/products';
+import CatalogueStatus from '../components/CatalogueStatus';
+import { useProducts } from '../context/ProductsContext';
 import './Jewellery.css';
 
 const TABS = [
@@ -146,7 +147,7 @@ function ProductListView({ items }) {
   });
 
   console.log(filtersOpen);
-
+  
   return (
     <>
       <div className="sort-control">
@@ -214,6 +215,7 @@ function ProductListView({ items }) {
 
 export default function Jewellery() {
   const [activeTab, setActiveTab] = useState('shop');
+  const { products, activeProducts, archivedProducts, status, reload } = useProducts();
 
   return (
     <section className="container" style={{ position: 'relative', zIndex: 1, padding: 'var(--space-5) var(--space-3)' }}>
@@ -236,9 +238,10 @@ export default function Jewellery() {
         ))}
       </div>
 
-      {activeTab === 'shop' && <ProductListView items={activeProducts()} />}
-      {activeTab === 'gallery' && <ProductListView items={products} />}
-      {activeTab === 'archive' && <ProductListView items={archivedProducts()} />}
+      <CatalogueStatus status={status} onRetry={reload} />
+      {status === 'ready' && activeTab === 'shop' && <ProductListView items={activeProducts} />}
+      {status === 'ready' && activeTab === 'gallery' && <ProductListView items={products} />}
+      {status === 'ready' && activeTab === 'archive' && <ProductListView items={archivedProducts} />}
     </section>
   );
 }

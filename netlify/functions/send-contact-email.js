@@ -13,20 +13,17 @@
 //      not for real customer submissions.
 //   4. Once deployed, copy this function's URL into
 //      src/pages/Contact.jsx (the CONTACT_ENDPOINT constant).
-//   5. Replace ALLOWED_ORIGIN below with your real site's domain once
-//      it's live, so only your site can call this function.
+//   5. Set SITE_URL (your real site's address) in the environment variables
+//      so only your site can call this function — see lib/cors.js.
+
+import { corsHeadersFor } from './lib/cors.js';
 
 const TO_EMAIL = 'ed@edweatherheadjewellery.com';
 const FROM_EMAIL = 'Ed Weatherhead Jewellery <ed@edweatherheadjewellery.com>'; // TODO: update after domain verification
-const ALLOWED_ORIGIN = 'https://edweatherheadjewellery.com/';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 export const handler = async (event) => {
+  const corsHeaders = corsHeadersFor(event);
+
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: corsHeaders, body: '' };
   }

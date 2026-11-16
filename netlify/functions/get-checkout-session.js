@@ -5,19 +5,12 @@
 // or reusing a cancelled session's URL.
 
 import Stripe from 'stripe';
+import { corsHeadersFor } from './lib/cors.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-// Adapts to localhost under `netlify dev` and to the real domain once
-// deployed — see the note in create-checkout-session.js.
-const ALLOWED_ORIGIN = process.env.URL || 'https://edweatherheadjewellery.com';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-};
-
 export const handler = async (event) => {
+  const corsHeaders = corsHeadersFor(event, 'GET, OPTIONS');
+
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: corsHeaders, body: '' };
   }

@@ -7,10 +7,16 @@
 // once you see the transfer land, the same way you'd handle any manual
 // bank-transfer sale.
 //
+// Availability and prices come from the database via the PHP API (reserve.php),
+// exactly like the card checkout: the piece(s) are held for 3 days, and the
+// order email contains a signed "manage this order" link. Opening it shows the
+// order with a "Payment received - mark as sold" button (and a way to cancel
+// and put the piece(s) back on sale if the customer never pays).
+//
 // Setup checklist:
 //   - Reuses the RESEND_API_KEY you already set up for the contact form.
-//   - Replace TO_EMAIL below if it should go somewhere other than the
-//     contact-form inbox.
+//   - The owner address is set in lib/email.js.
+//   - API_BASE_URL and API_SECRET must be set (see lib/api.js).
 //   - Until you verify a sending domain in Resend, this can only deliver
 //     to the email address your Resend account itself is registered with
 //     (see the note in send-contact-email.js) — good enough for testing,
@@ -18,35 +24,13 @@
 //   - TODO: once a domain is verified, consider also sending the customer
 //     a copy of their order + PayID instructions as a confirmation email.
 
-import { connectLambda } from '@netlify/blobs';
-import { products } from '../../src/data/products.js';
 import { calculateShipping } from '../../src/data/shipping.js';
-import { reserveItems, releaseItems } from './lib/inventory.js';
-
-const TO_EMAIL = 'ed@edweatherheadjewellery.com';
-const FROM_EMAIL = 'Ed Weatherhead Jewellery <ed@edweatherheadjewellery.com>';
-// Adapts to localhost under `netlify dev` and to the real domain once
-// deployed — see the note in create-checkout-session.js.
-const ALLOWED_ORIGIN = process.env.URL || 'https://edweatherheadjewellery.com';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
-
-function generateReference() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I — avoids look-alike mixups when read aloud or typed
-  let code = '';
-  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return `EWJ-${code}`;
-}
+import { callApi, describeReservationFailure, releaseOrder, resolveHolderId } from './lib/api.js';
+import { sendOwnerEmail } from './lib/email.js';
+import { corsHeadersFor } from './lib/cors.js';
 
 export const handler = async (event) => {
-  // Wires up Netlify Blobs for this invocation — see the note in
-  // create-checkout-session.js. Without this, reserveItems/releaseItems
-  // below would throw instead of placing/clearing a hold.
-  connectLambda(event);
+  const corsHeaders = corsHeadersFor(event);
 
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: corsHeaders, body: '' };
@@ -90,65 +74,65 @@ export const handler = async (event) => {
     }
   }
 
-  // Re-price from real product data, exactly as the Stripe function does —
-  // never trust a price sent by the browser.
-  const orderLines = [];
-  let subtotal = 0;
-
-  for (const item of items) {
-    const product = products.find((p) => p.refnumber === item.refnumber);
-    if (!product) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: `Unknown item: ${item.refnumber}` }) };
-    }
-    if (product.archived || product.sold) {
-      return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: `${product.title} is no longer available.` }),
-      };
-    }
-    if (!product.price) {
-      return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: `${product.title} is not available for direct purchase.` }),
-      };
-    }
-    const price = Number(product.price);
-    subtotal += price;
-    orderLines.push({ title: product.title, refnumber: product.refnumber, price });
+  if (!items.every((item) => typeof item?.refnumber === 'string')) {
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid item in cart.' }) };
   }
 
-  const shipping = calculateShipping(subtotal);
-  const total = subtotal + shipping;
-  const reference = generateReference();
-
-  // Reserve every item before sending the order email — this is what stops
-  // this same piece being bought via card (or another PayID order) while
-  // this one is pending. PayID holds last longer than card holds (there's
-  // no automatic payment confirmation to shorten the wait), and are only
-  // released manually via products.js or automatically if nothing happens
-  // for a few days.
-  const refnumbers = orderLines.map((l) => l.refnumber);
+  // Hold every piece and create the pending order. Prices, titles and
+  // availability come from the database, never from the browser — and the hold
+  // is what stops this same piece being bought by card (or another PayID order)
+  // while this one is pending. PayID holds last longer than card holds (3 days):
+  // there's no automatic payment confirmation to shorten the wait.
   let reservation;
   try {
-    reservation = await reserveItems(refnumbers, { method: 'payid', reference, holderId: cartSessionId });
+    reservation = await callApi('reserve.php', {
+      items: items.map((item) => ({ refnumber: item.refnumber })),
+      holder_id: resolveHolderId(cartSessionId),
+      method: 'payid',
+      customer,
+      billing: billing || null,
+    });
   } catch (err) {
+    console.error('reserve.php failed', err);
     return {
       statusCode: 500,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Could not check item availability.', detail: err.message }),
+      body: JSON.stringify({ error: 'Could not check item availability.' }),
     };
   }
 
-  if (!reservation.ok) {
-    const unavailableProduct = products.find((p) => p.refnumber === reservation.unavailable);
+  if (reservation.status !== 200 || !reservation.data?.ok) {
+    const { statusCode, error } = describeReservationFailure(reservation.data);
+    if (statusCode >= 500) console.error('reserve.php returned', reservation.status, reservation.data);
+    return { statusCode, headers: corsHeaders, body: JSON.stringify({ error }) };
+  }
+
+  const { order, items: lines, manage_url: manageUrl } = reservation.data;
+  const reference = order.reference;
+  const orderLines = lines.map((l) => ({ title: l.title, refnumber: l.refnumber, price: l.unit_price_cents / 100 }));
+
+  const subtotalCents = order.subtotal_cents;
+  const shippingCents = Math.round(calculateShipping(subtotalCents / 100) * 100);
+  const subtotal = subtotalCents / 100;
+  const shipping = shippingCents / 100;
+  const total = (subtotalCents + shippingCents) / 100;
+
+  try {
+    const attached = await callApi('attach.php', {
+      order_id: order.id,
+      shipping_cents: shippingCents,
+      total_cents: subtotalCents + shippingCents,
+    });
+    if (attached.status !== 200 || !attached.data?.ok) {
+      throw new Error(`attach.php returned ${attached.status}`);
+    }
+  } catch (err) {
+    console.error('attach.php failed', err);
+    await releaseOrder(order.id);
     return {
-      statusCode: 409,
+      statusCode: 500,
       headers: corsHeaders,
-      body: JSON.stringify({
-        error: `${unavailableProduct?.title || 'One of these items'} was just purchased by someone else. Please remove it from your cart and try again.`,
-      }),
+      body: JSON.stringify({ error: 'Could not place order.' }),
     };
   }
 
@@ -190,31 +174,27 @@ ${addressBlock}
 Billing address:
 ${billingBlock}
 
-This order is PENDING until you see a PayID transfer of $${total.toFixed(2)} AUD land in your account with reference "${reference}". Once confirmed, mark the piece(s) as sold and arrange shipping with the customer.`;
+This order is PENDING until you see a PayID transfer of $${total.toFixed(2)} AUD land in your account with reference "${reference}". Once confirmed, open the link below and press "Payment received - mark as sold", then arrange shipping with the customer.
+
+Manage this order:
+${manageUrl}
+
+If the customer never pays, use the same page to cancel the order and put the piece(s) back on sale. Otherwise the hold lapses by itself after 3 days.`;
 
   try {
-    const resendRes = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: [TO_EMAIL],
-        reply_to: customer.email,
-        subject: `New PayID order ${reference} — $${total.toFixed(2)} AUD`,
-        text: emailText,
-      }),
+    const sent = await sendOwnerEmail({
+      subject: `New PayID order ${reference} — $${total.toFixed(2)} AUD`,
+      text: emailText,
+      replyTo: customer.email,
     });
 
-    if (!resendRes.ok) {
-      const detail = await resendRes.text();
-      await releaseItems(refnumbers); // the order didn't actually go through — don't leave it locked
+    if (!sent.ok) {
+      console.error('Resend rejected the order email', sent.detail);
+      await releaseOrder(order.id); // the order didn't actually go through — don't leave it locked
       return {
         statusCode: 502,
         headers: corsHeaders,
-        body: JSON.stringify({ error: 'Could not send order notification.', detail }),
+        body: JSON.stringify({ error: 'Could not send order notification.' }),
       };
     }
 
@@ -230,7 +210,8 @@ This order is PENDING until you see a PayID transfer of $${total.toFixed(2)} AUD
       }),
     };
   } catch (err) {
-    await releaseItems(refnumbers);
+    console.error('Unexpected error sending PayID order email', err);
+    await releaseOrder(order.id);
     return {
       statusCode: 500,
       headers: corsHeaders,

@@ -1,0 +1,13 @@
+.catalogue-status {
+  margin: var(--space-4, 2rem) 0;
+}
+
+.catalogue-status-retry {
+  font: inherit;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}

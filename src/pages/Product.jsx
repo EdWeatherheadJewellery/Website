@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { products } from '../data/products';
+import { useProducts } from '../context/ProductsContext';
+import CatalogueStatus from '../components/CatalogueStatus';
 import AddToCartButton from '../components/AddToCartButton';
 import '../components/ProductCard.css';
 import './Product.css';
@@ -91,9 +92,19 @@ export default function Product() {
   const { name } = useParams();
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
+  const { products, status, reload } = useProducts();
+
   const product = products.find((p) => p.name === name);
 
   if (!product) {
+    // Don't claim a piece doesn't exist just because the catalogue hasn't arrived.
+    if (status !== 'ready') {
+      return (
+        <section className="container" style={{ position: 'relative', zIndex: 1, padding: 'var(--space-5) var(--space-3)' }}>
+          <CatalogueStatus status={status} onRetry={reload} />
+        </section>
+      );
+    }
     return <NotFoundProduct />;
   }
 
@@ -124,20 +135,20 @@ export default function Product() {
       <p className="eyebrow">Jewellery</p>
       <h1 style={{ fontSize: 'var(--size-xl)' }}>{product.title}</h1>
 
-      {/* {product.commission ? (
+      {product.commission ? (
         <p className="product-page-badge product-page-commission">Available by request</p>
       ) : (
         product.sold && <p className="product-page-badge product-page-sold">Sold</p>
-      )} */}
+      )}
 
       <div className="product-card-meta">
         {product.stone.map((tag) => <span key={tag}>{tag}</span>)}
         {product.metal.map((tag) => <span key={tag}>{tag}</span>)}
       </div>
 
-       {/* {!product.sold && !product.archived && product.price && (
-         <p className="product-page-price">${product.price}</p>
-        )} */}
+       {!product.sold && !product.archived && product.price && (
+        <p className="product-page-price">${product.price}</p>
+      )}
 
       <AddToCartButton product={product} />
 

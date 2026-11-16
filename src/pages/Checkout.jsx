@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useCart } from '../context/CartContext';
 import { formatAUD } from '../utils/currency';
 import { getCartSessionId } from '../utils/cartSession';
+import { functionUrl } from '../utils/functionsBase';
 import { calculateShipping, FREE_SHIPPING_THRESHOLD } from '../data/shipping';
 import './Checkout.css';
 
@@ -25,7 +26,7 @@ const emptyBilling = {
 };
 
 export default function Checkout() {
-  const { items, subtotal, clearCart } = useCart();
+  const { items, subtotal, clearCart, loading, unavailable } = useCart();
   const navigate = useNavigate();
 
   const [method, setMethod] = useState('card');
@@ -35,6 +36,18 @@ export default function Checkout() {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+
+  // Wait for the catalogue before deciding the cart is empty — otherwise
+  // refreshing this page would bounce you to the cart while products load.
+  if (loading || unavailable) {
+    return (
+      <section className="container checkout-page" style={{ position: 'relative', zIndex: 1, padding: 'var(--space-5) var(--space-3)' }}>
+        <p role={unavailable ? 'alert' : 'status'}>
+          {unavailable ? 'We couldn\u2019t load your order just now. Please refresh the page to try again.' : 'Loading\u2026'}
+        </p>
+      </section>
+    );
+  }
 
   if (items.length === 0) {
     return <Navigate to="/cart" replace />;
@@ -74,7 +87,7 @@ export default function Checkout() {
     setSubmitError(null);
     setSubmitting(true);
     try {
-      const res = await fetch('/.netlify/functions/create-checkout-session', {
+      const res = await fetch(functionUrl('create-checkout-session'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -98,7 +111,7 @@ export default function Checkout() {
 
     setSubmitting(true);
     try {
-      const res = await fetch('/.netlify/functions/send-payid-order', {
+      const res = await fetch(functionUrl('send-payid-order'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

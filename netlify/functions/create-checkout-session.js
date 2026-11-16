@@ -1,56 +1,42 @@
-// Netlify Function — receives a cart from the frontend, looks up each
-// item's real price from src/data/products.js (never trusts a price sent
-// by the browser), and creates a Stripe Checkout Session. The frontend
-// redirects the customer to the returned URL to pay.
+// Netlify Function — receives a cart from the frontend and starts a Stripe
+// Checkout Session. The browser only ever sends refnumbers: prices, titles and
+// availability all come from the database via the PHP API, so a customer can't
+// alter a price (or buy something that's already gone) by editing the request.
+//
+// Flow:
+//   1. reserve.php  — atomically creates a pending order and holds every item
+//                     (all-or-nothing). Fails if any piece is sold or held by
+//                     someone else. If the same customer is retrying (e.g. they
+//                     pressed Stripe's "back" link) their own hold is reclaimed
+//                     and their previous Stripe session is handed back to us.
+//   2. Expire that earlier Stripe session so it can't be paid by mistake.
+//   3. Create the new Stripe session.
+//   4. attach.php   — record shipping, total and the Stripe session id.
+//
+// stripe-webhook.js turns the pending order into a paid one when Stripe confirms.
 //
 // Setup checklist:
-//   1. Add the "stripe" package: run `npm install stripe` in the project
-//      root (this adds it to package.json/package-lock.json).
-//   2. Set STRIPE_SECRET_KEY in this Netlify site's environment variables
-//      (use your Stripe *secret* key — starts with sk_test_... while
-//      testing, sk_live_... once you're ready to go live). Never put this
-//      key in frontend code.
-//   3. SUCCESS_URL, CANCEL_URL and ALLOWED_ORIGIN below are derived
-//      automatically from Netlify's process.env.URL — no need to edit them
-//      for local dev vs. production, they just adapt.
-//   4. Update SHIPPING_COUNTRIES if you ship outside Australia.
-//   5. Once deployed, call this function from your cart's checkout button
-//      — see the usage note at the bottom of this file.
+//   - STRIPE_SECRET_KEY, API_BASE_URL and API_SECRET set in Netlify's
+//     environment variables (see lib/api.js).
+//   - SITE_URL set to your real site (https://edweatherheadjewellery.com). Stripe
+//     sends customers back there, and only that origin may call this function
+//     (see lib/cors.js). Leave it unset under `netlify dev`.
+//   - Update SHIPPING_COUNTRIES (src/data/shipping.js) if you ship outside Australia.
 
 import Stripe from 'stripe';
-import { connectLambda } from '@netlify/blobs';
-import { products } from '../../src/data/products.js';
 import { SHIPPING_COUNTRIES, calculateShipping } from '../../src/data/shipping.js';
-import { reserveItems, releaseItems } from './lib/inventory.js';
+import { callApi, describeReservationFailure, releaseOrder, resolveHolderId } from './lib/api.js';
+import { corsHeadersFor, siteUrl } from './lib/cors.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Netlify sets process.env.URL to whatever the current context actually is:
-// http://localhost:8888 under `netlify dev`, or your real domain once
-// deployed — so these adapt automatically instead of always pointing at
-// production. Falls back to the live domain if that variable is ever unset.
-const SITE_URL = process.env.URL || 'https://edweatherheadjewellery.com';
-const ALLOWED_ORIGIN = SITE_URL;
-const SUCCESS_URL = `${SITE_URL}/order-success`;
-const CANCEL_URL = `${SITE_URL}/cart`;
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
-
 export const handler = async (event) => {
-  // Netlify Blobs doesn't auto-configure itself when a function runs in
-  // Lambda-compatibility mode (the classic `handler` syntax used here) —
-  // this wires up the current site/token so reserveItems/releaseItems
-  // below can actually reach the blob store instead of throwing.
-  connectLambda(event);
+  const corsHeaders = corsHeadersFor(event);
+  const reply = (statusCode, body) => ({ statusCode, headers: corsHeaders, body: JSON.stringify(body) });
 
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: corsHeaders, body: '' };
   }
-
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers: corsHeaders, body: 'Method Not Allowed' };
   }
@@ -59,134 +45,114 @@ export const handler = async (event) => {
   try {
     data = JSON.parse(event.body);
   } catch {
-    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid request body.' }) };
+    return reply(400, { error: 'Invalid request body.' });
   }
 
   const { items, cartSessionId } = data;
 
   if (!Array.isArray(items) || items.length === 0) {
-    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'No items in cart.' }) };
+    return reply(400, { error: 'No items in cart.' });
+  }
+  if (!items.every((item) => typeof item?.refnumber === 'string')) {
+    return reply(400, { error: 'Invalid item in cart.' });
   }
 
-  // Build Stripe line items from your real product data — the browser
-  // only ever sends refnumbers, so a customer can't alter a price in the
-  // request and pay less than the real amount.
-  const line_items = [];
-
-  for (const item of items) {
-    const product = products.find((p) => p.refnumber === item.refnumber);
-
-    if (!product) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: `Unknown item: ${item.refnumber}` }) };
-    }
-    if (product.archived || product.sold) {
-      return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: `${product.title} is no longer available.` }),
-      };
-    }
-    if (!product.price) {
-      return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: `${product.title} is not available for direct purchase.` }),
-      };
-    }
-
-    const quantity = Number.isInteger(item.quantity) && item.quantity > 0 ? item.quantity : 1;
-
-    line_items.push({
-      quantity,
-      price_data: {
-        currency: 'aud',
-        unit_amount: Math.round(parseFloat(product.price) * 100),
-        product_data: {
-          name: product.title,
-          metadata: { refnumber: product.refnumber },
-        },
-      },
-    });
-  }
-
-  // Reserve every item before we let Stripe take payment — this is what
-  // actually stops two customers both successfully paying for the same
-  // one-of-a-kind piece. If anything in the cart is already held by
-  // another in-progress or completed purchase, nothing is charged.
-  const refnumbers = line_items.map((li) => li.price_data.product_data.metadata.refnumber);
+  // 1. Create the pending order and hold every item.
   let reservation;
   try {
-    reservation = await reserveItems(refnumbers, { method: 'card', holderId: cartSessionId });
+    reservation = await callApi('reserve.php', {
+      items: items.map((item) => ({ refnumber: item.refnumber })),
+      holder_id: resolveHolderId(cartSessionId),
+      method: 'card',
+    });
   } catch (err) {
-    // A blob-store failure here (misconfiguration, outage, etc.) should
-    // still come back as JSON the frontend can parse, not a raw crash.
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Could not check item availability.', detail: err.message }),
-    };
+    console.error('reserve.php failed', err);
+    return reply(500, { error: 'Could not check item availability.' });
   }
 
-  if (!reservation.ok) {
-    const unavailableProduct = products.find((p) => p.refnumber === reservation.unavailable);
-    return {
-      statusCode: 409,
-      headers: corsHeaders,
-      body: JSON.stringify({
-        error: `${unavailableProduct?.title || 'One of these items'} was just purchased by someone else. Please remove it from your cart and try again.`,
-      }),
-    };
+  if (reservation.status !== 200 || !reservation.data?.ok) {
+    const { statusCode, error } = describeReservationFailure(reservation.data);
+    if (statusCode >= 500) console.error('reserve.php returned', reservation.status, reservation.data);
+    return reply(statusCode, { error });
   }
 
-  // Shipping is calculated from the real (server-priced) subtotal, not
-  // anything sent by the browser.
-  const subtotal = line_items.reduce((sum, li) => sum + (li.price_data.unit_amount / 100) * li.quantity, 0);
-  const shippingAmount = calculateShipping(subtotal);
+  const { order, items: lines, expire_stripe_sessions: staleSessions = [] } = reservation.data;
 
+  // Shipping is calculated from the real (database-priced) subtotal, not
+  // anything sent by the browser. Everything below is in whole cents.
+  const subtotalCents = order.subtotal_cents;
+  const shippingCents = Math.round(calculateShipping(subtotalCents / 100) * 100);
+
+  // 2. This customer's earlier, abandoned Stripe session(s) must not stay payable.
+  //    (If one was somehow already paid, Stripe refuses and we carry on — the
+  //    webhook copes with that case.)
+  await Promise.allSettled(staleSessions.map((id) => stripe.checkout.sessions.expire(id)));
+
+  // 3. Create the Stripe session.
+  let session;
   try {
-    const session = await stripe.checkout.sessions.create({
+    session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      line_items,
-      success_url: `${SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: CANCEL_URL,
-      metadata: { refnumbers: JSON.stringify(refnumbers) }, // read back by stripe-webhook.js once payment succeeds
+      line_items: lines.map((line) => ({
+        quantity: 1,
+        price_data: {
+          currency: 'aud',
+          unit_amount: line.unit_price_cents,
+          product_data: { name: line.title, metadata: { refnumber: line.refnumber } },
+        },
+      })),
+      success_url: `${siteUrl()}/order-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl()}/cart`,
+      client_reference_id: order.reference,
+      metadata: { order_id: String(order.id), reference: order.reference }, // read back by stripe-webhook.js
       shipping_address_collection: { allowed_countries: SHIPPING_COUNTRIES },
       shipping_options: [
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: Math.round(shippingAmount * 100), currency: 'aud' },
-            display_name: shippingAmount === 0 ? 'Free shipping' : 'Flat rate shipping',
+            fixed_amount: { amount: shippingCents, currency: 'aud' },
+            display_name: shippingCents === 0 ? 'Free shipping' : 'Flat rate shipping',
           },
         },
       ],
     });
-
-    return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({ url: session.url }),
-    };
   } catch (err) {
-    // The reservation succeeded but Stripe itself failed — release the
-    // hold rather than leaving it locked for nothing until it expires.
-    await releaseItems(refnumbers);
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Could not start checkout.', detail: err.message }),
-    };
+    // The hold worked but Stripe itself failed — free the items now rather
+    // than leaving them locked for nothing until the hold times out.
+    console.error('Stripe session creation failed', err);
+    await releaseOrder(order.id);
+    return reply(500, { error: 'Could not start checkout.' });
   }
+
+  // 4. Record the final amounts and the Stripe session id on the order.
+  try {
+    const attached = await callApi('attach.php', {
+      order_id: order.id,
+      shipping_cents: shippingCents,
+      total_cents: subtotalCents + shippingCents,
+      stripe_session_id: session.id,
+    });
+    if (attached.status !== 200 || !attached.data?.ok) {
+      throw new Error(`attach.php returned ${attached.status}`);
+    }
+  } catch (err) {
+    // Without this link the order can't be matched to the payment — don't
+    // hand the customer a payable session we can't track.
+    console.error('attach.php failed', err);
+    await Promise.allSettled([stripe.checkout.sessions.expire(session.id)]);
+    await releaseOrder(order.id);
+    return reply(500, { error: 'Could not start checkout.' });
+  }
+
+  return reply(200, { url: session.url });
 };
 
-// Frontend usage, once deployed — call this from your cart/checkout button:
+// Frontend usage (see src/pages/Checkout.jsx):
 //
 //   const res = await fetch('/.netlify/functions/create-checkout-session', {
 //     method: 'POST',
 //     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify({
-//       items: cart.map(({ refnumber, quantity }) => ({ refnumber, quantity })),
-//     }),
+//     body: JSON.stringify({ items: [{ refnumber }], cartSessionId }),
 //   });
 //   const { url, error } = await res.json();
 //   if (url) window.location.href = url; // sends the customer to Stripe's hosted checkout page

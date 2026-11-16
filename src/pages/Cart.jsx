@@ -8,7 +8,7 @@ import './Cart.css';
 const SITE_NAME = 'Ed Weatherhead Jewellery';
 
 export default function Cart() {
-  const { items, subtotal, removeItem } = useCart();
+  const { items, subtotal, removeItem, loading, unavailable } = useCart();
   const navigate = useNavigate();
 
   return (
@@ -20,7 +20,13 @@ export default function Cart() {
       <p className="eyebrow">Cart</p>
       <h1 style={{ fontSize: 'var(--size-xl)' }}>Your cart</h1>
 
-      {items.length === 0 ? (
+      {loading ? (
+        <p role="status">Loading your cart&hellip;</p>
+      ) : unavailable ? (
+        <div className="cart-empty" role="alert">
+          <p>We couldn&rsquo;t load your cart just now. Please refresh the page to try again.</p>
+        </div>
+      ) : items.length === 0 ? (
         <div className="cart-empty">
           <p>Your cart is empty.</p>
           <Link to="/shop" className="product-page-back">← Browse jewellery</Link>
@@ -65,7 +71,7 @@ export default function Cart() {
               <span>Subtotal</span>
               <span className="cart-summary-total">{formatAUD(subtotal)}</span>
             </div>
-            {/* <p className="cart-summary-note">Shipping is calculated at checkout.</p> */}
+            <p className="cart-summary-note">Shipping is calculated at checkout.</p>
             <button type="button" className="add-to-cart-button cart-checkout-button" onClick={() => navigate('/checkout')}>
               Proceed to checkout
             </button>

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useCart } from '../context/CartContext';
 import { formatAUD } from '../utils/currency';
 import './OrderSuccess.css';
+import { functionUrl } from '../utils/functionsBase';
 
 const SITE_NAME = 'Ed Weatherhead Jewellery';
 const BUSINESS_PAYID = '75218463253'; // TODO: keep in sync with Checkout.jsx
@@ -23,7 +24,7 @@ export default function OrderSuccess() {
     if (!sessionId) return;
     let cancelled = false;
 
-    fetch(`/.netlify/functions/get-checkout-session?session_id=${encodeURIComponent(sessionId)}`)
+    fetch(`${functionUrl('get-checkout-session')}?session_id=${encodeURIComponent(sessionId)}`)
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return;
