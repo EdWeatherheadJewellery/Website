@@ -8,8 +8,10 @@
 // bank-transfer sale.
 //
 // Availability and prices come from the database via the PHP API (reserve.php),
-// exactly like the card checkout: the piece(s) are held for 3 days, and the
-// order email contains a signed "manage this order" link. Opening it shows the
+// exactly like the card checkout, except that a PayID order marks the piece(s) as
+// SOLD straight away (a bank transfer can't confirm itself). Unpaid orders are
+// released automatically after 3 days, or by cancelling from the signed
+// "manage this order" link in the order email. Opening it shows the
 // order with a "Payment received - mark as sold" button (and a way to cancel
 // and put the piece(s) back on sale if the customer never pays).
 //
@@ -78,11 +80,10 @@ export const handler = async (event) => {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid item in cart.' }) };
   }
 
-  // Hold every piece and create the pending order. Prices, titles and
-  // availability come from the database, never from the browser — and the hold
-  // is what stops this same piece being bought by card (or another PayID order)
-  // while this one is pending. PayID holds last longer than card holds (3 days):
-  // there's no automatic payment confirmation to shorten the wait.
+  // Create the pending order and mark every piece sold. Prices, titles and
+  // availability come from the database, never from the browser. Marking the
+  // piece sold is what stops it being bought by card (or another PayID order)
+  // while this one waits for payment; cancelling the order puts it back on sale.
   let reservation;
   try {
     reservation = await callApi('reserve.php', {
@@ -179,7 +180,7 @@ This order is PENDING until you see a PayID transfer of $${total.toFixed(2)} AUD
 Manage this order:
 ${manageUrl}
 
-If the customer never pays, use the same page to cancel the order and put the piece(s) back on sale. Otherwise the hold lapses by itself after 3 days.`;
+The piece(s) already show as sold on the website. If the customer never pays, use the same page to cancel the order and put the piece(s) back on sale; unpaid orders also go back on sale automatically after 3 days.`;
 
   try {
     const sent = await sendOwnerEmail({
