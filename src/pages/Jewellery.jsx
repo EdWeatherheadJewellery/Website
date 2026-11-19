@@ -146,8 +146,6 @@ function ProductListView({ items }) {
     }
   });
 
-  console.log(filtersOpen);
-  
   return (
     <>
       <div className="sort-control">

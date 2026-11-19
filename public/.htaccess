@@ -1,0 +1,17 @@
+# Lets the React site's pages work when opened directly, refreshed, or reached
+# from Stripe (/cart, /order-success?session_id=...): any address that isn't a
+# real file or folder is handed to the app. /api* (api, api_test...) and /.netlify are excluded so a
+# wrong API or function address gives a real 404 instead of the website
+# (otherwise a misconfigured Stripe webhook would get "200 OK" and fail silently).
+#
+# If your GreenGeeks site already has a .htaccess, merge these lines into it
+# rather than replacing it.
+Options -MultiViews
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_URI} !^/api
+RewriteCond %{REQUEST_URI} !^/\.netlify/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]

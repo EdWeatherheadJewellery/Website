@@ -7,5 +7,8 @@
 // Leave it unset for local development with `netlify dev`, where the site and
 // the functions share one address and relative URLs work.
 const BASE = (import.meta.env.VITE_FUNCTIONS_BASE_URL || '').replace(/\/+$/, '');
+const liveBase = 'https://edweatherheadjewellery.com';
+const testCheckout = liveBase.replace(/\/+$/, '');
 
 export const functionUrl = (name) => `${BASE}/.netlify/functions/${name}`;
+export const functionUrlTestCheckout = (name) => `${testCheckout}/.netlify/functions/${name}`;

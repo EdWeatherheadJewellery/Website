@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { formatAUD } from '../utils/currency';
 import { getCartSessionId } from '../utils/cartSession';
 import { functionUrl } from '../utils/functionsBase';
+import {functionUrlTestCheckout} from '../utils/functionsBase';
 import { calculateShipping, FREE_SHIPPING_THRESHOLD } from '../data/shipping';
 import './Checkout.css';
 
@@ -87,6 +88,7 @@ export default function Checkout() {
     setSubmitError(null);
     setSubmitting(true);
     try {
+      // const res = await fetch(functionUrlTestCheckout('create-checkout-session'), {
       const res = await fetch(functionUrl('create-checkout-session'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

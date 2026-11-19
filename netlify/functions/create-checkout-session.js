@@ -40,7 +40,6 @@ export const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers: corsHeaders, body: 'Method Not Allowed' };
   }
-
   let data;
   try {
     data = JSON.parse(event.body);
