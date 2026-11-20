@@ -113,13 +113,27 @@ export const handler = async (event) => {
   }
 
   const signature = event.headers['stripe-signature'];
+  // Stripe signs the exact bytes it sent, so we need the body untouched. Netlify
+  // normally hands it over as plain text, but may base64-encode it.
+  const rawBody = event.isBase64Encoded ? Buffer.from(event.body || '', 'base64').toString('utf8') : event.body;
   let stripeEvent;
 
   try {
     // Verifying against the RAW body (not JSON.parse'd) is what proves this
     // request genuinely came from Stripe and wasn't forged — never skip it.
-    stripeEvent = stripe.webhooks.constructEvent(event.body, signature, process.env.STRIPE_WEBHOOK_SECRET);
+    stripeEvent = stripe.webhooks.constructEvent(rawBody, signature, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
+    // Say WHY in the function logs (the terminal running `netlify dev`, or Netlify's
+    // function logs), so a rejected webhook is never silent. Secrets are never logged.
+    let hint = '';
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      hint = 'STRIPE_WEBHOOK_SECRET is not set for this environment.';
+    } else if (/No signatures found/i.test(err.message)) {
+      hint = "STRIPE_WEBHOOK_SECRET doesn't match the signing secret of whatever sent this. Local testing: use the secret from `stripe listen` (run `stripe listen --print-secret`). The live site: use the secret of the endpoint in Stripe's dashboard.";
+    } else if (/timestamp/i.test(err.message)) {
+      hint = "The event is too old, or this computer's clock is wrong.";
+    }
+    console.error('Stripe webhook REJECTED (400):', err.message, hint);
     return { statusCode: 400, body: `Webhook signature verification failed: ${err.message}` };
   }
 
