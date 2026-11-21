@@ -23,8 +23,11 @@
 //     to the email address your Resend account itself is registered with
 //     (see the note in send-contact-email.js) — good enough for testing,
 //     but you won't get real order emails until that's set up.
-//   - TODO: once a domain is verified, consider also sending the customer
-//     a copy of their order + PayID instructions as a confirmation email.
+//   - The customer's own email (order + how to pay by PayID) is sent by the PHP API,
+//     via notify.php, once your order notification above has gone out. All the
+//     customer emails (card confirmation, PayID instructions, auto-cancelled,
+//     payment received) are built in api/lib/mail.php and need `resend_api_key`
+//     in the PHP config file.
 
 import { calculateShipping } from '../../src/data/shipping.js';
 import { callApi, describeReservationFailure, releaseOrder, resolveHolderId } from './lib/api.js';
@@ -197,6 +200,18 @@ The piece(s) already show as sold on the website. If the customer never pays, us
         headers: corsHeaders,
         body: JSON.stringify({ error: 'Could not send order notification.' }),
       };
+    }
+
+    // Email the customer how to pay. Best-effort: the order is already placed and
+    // your notification sent, and the same instructions are on the confirmation
+    // page, so a failure here is logged but never fails the order.
+    try {
+      const notified = await callApi('notify.php', { order_id: order.id, event: 'payid_placed' });
+      if (notified.status !== 200 || !notified.data?.ok) {
+        console.error('notify.php did not queue the customer PayID email', reference, notified.status, notified.data);
+      }
+    } catch (err) {
+      console.error('Could not ask notify.php to email the customer', reference, err);
     }
 
     return {
